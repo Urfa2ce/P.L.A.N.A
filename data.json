@@ -1,0 +1,58 @@
+{
+    "eventSettings":  { 
+    "currencyIcons": [
+      "Texture2D/Item_Icon_Event_Item_0.png",
+      "Texture2D/Item_Icon_Event_Token_1_S55.png",
+      "Texture2D/Item_Icon_Event_Token_2_S55.png",
+      "Texture2D/Item_Icon_Event_Token_3_S55.png"
+    ],
+    "tabMap": [1, 2, 3]
+  },
+  "shopConfig": [
+    [
+      { "name": "최상급 BD", "img": "marix.png", "price": 1, "qty": 180 }, 
+      { "name": "상급 BD", "img": "bd_gold.png", "price": 4, "qty": 95 },
+      { "name": "중급 BD", "img": "bd_blue.png", "price": 15, "qty": 30 },
+      { "name": "비의서", "img": "secret_tech.png", "price": 60, "qty": 12 },
+      { "name": "크레딧 포인트", "img": "credit.png", "price": 5, "qty": 50 }
+    ],
+    [
+      { "name": "하급 강화석", "img": "Texture2D/Equipment_Icon_Exp_0.png", "price": 1, "qty": 180 }, 
+      { "name": "일반 강화석", "img": "Texture2D/Equipment_Icon_Exp_1.png", "price": 4, "qty": 95 },
+      { "name": "상급 강화석", "img": "Texture2D/Equipment_Icon_Exp_2.png", "price": 15, "qty": 30 },
+      { "name": "최상급 강화석", "img": "Texture2D/Equipment_Icon_Exp_3.png", "price": 60, "qty": 12 },
+
+      { "name": "기초 기술 노트\n(레드윈터)", "img": "Texture2D/Item_Icon_SkillBook_RedWinter_0.png", "price": 5, "qty": 50 },
+      { "name": "일반 기술 노트\n(레드윈터)", "img": "Texture2D/Item_Icon_SkillBook_RedWinter_1.png", "price": 15, "qty": 38 },
+      { "name": "상급 기술 노트\n(레드윈터)", "img": "Texture2D/Item_Icon_SkillBook_RedWinter_2.png", "price": 50, "qty": 25 },
+      { "name": "최상급 기술 노트\n(레드윈터)", "img": "Texture2D/Item_Icon_SkillBook_RedWinter_3.png", "price": 200, "qty": 15 },
+
+      { "name": "파에스토스 원반 조각", "img": "Texture2D/Item_Icon_Material_Phaistos_0.png", "price": 5, "qty": 150 },
+      { "name": "파손된 파에스토스 원반", "img": "Texture2D/Item_Icon_Material_Phaistos_1.png", "price": 15, "qty": 50 },
+      { "name": "마모된 파에스토스 원반", "img": "Texture2D/Item_Icon_Material_Phaistos_2.png", "price": 50, "qty": 30 },
+      { "name": "온전한 파에스토스 원반", "img": "Texture2D/Item_Icon_Material_Phaistos_3.png", "price": 200, "qty": 11 },
+
+      { "name": "비싸보이는 금박 욕망의 항아리", "img": "Texture2D/Item_Icon_Favor_29.png", "price": 200, "qty": 10 },
+      { "name": "금단의 연애", "img": "Texture2D/Item_Icon_Favor_3.png", "price": 200, "qty": 10 },
+      { "name": "고풍스러운 달걀 공예품", "img": "Texture2D/Item_Icon_Favor_Lv2_3.png", "price": 300, "qty": 1 },
+      { "name": "크레딧 포인트", "img": "Texture2D/Currency_Icon_Gold.png", "price": 5, "qty": -1 }
+    ],
+    [
+      { "name": "가구", "img": "furniture.png", "price": 1000, "qty": 1 }
+    ]
+  ],
+  "stageConfig": [ 
+    { "name": "01지 ", "ap": 10, "drops": [2, 8, 8, null] },
+    { "name": "02지 ", "ap": 10, "drops": [0, 8, 2, null] },
+    { "name": "03지 ", "ap": 10, "drops": [0, 12, 6, null] },
+    { "name": "04지 ", "ap": 10, "drops": [12, 3, 3, null] },
+    { "name": "05지 ", "ap": 15, "drops": [5, 11, 11, null] },
+    { "name": "06지 ", "ap": 15, "drops": [null, 16, 11, null] },
+    { "name": "07지 ", "ap": 15, "drops": [null, 11, 16, null] },
+    { "name": "08지 ", "ap": 15, "drops": [19, 4, 4, null] },
+    { "name": "09지 ", "ap": 20, "drops": [8, 14, 14, null] },
+    { "name": "10지 ", "ap": 20, "drops": [4, 32, 0, null] },
+    { "name": "11지 )", "ap": 20, "drops": [4, 32, 0, null] },
+    { "name": "12지 ", "ap": 20, "drops": [36, 0, 0, null] }
+  ]
+}

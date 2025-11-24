@@ -8,13 +8,42 @@
 </head>
 <body>
 
+<div class="ap-widget">
+    <div class="ap-header" onclick="toggleApWidget()" title="클릭해서 접기/펴기">
+        <span>☕ AP 계산기</span>
+        <span id="apToggleIcon" style="font-size:0.8rem;">▼</span>
+    </div>
+    
+    <div id="apWidgetBody" class="ap-body">
+        <div class="ap-input-row">
+            <button class="ap-btn" onclick="adjustAp(-1)">-</button>
+            <input type="number" id="curAp" placeholder="현재" oninput="calcAp()">
+            <button class="ap-btn" onclick="adjustAp(1)">+</button>
+            <span class="slash">/</span>
+            <span class="max-ap-text">240</span>
+        </div>
+        <div id="apResult" class="ap-result">
+            입력 대기 중...
+        </div>
+    </div>
+</div>
+
 <div class="container">
-    <h1>💎 이벤트 상점 계산기</h1>
+    <h1>이벤트 상점 계산기</h1>
 
     <div class="shop-tabs">
-        <div class="tab-btn active" onclick="switchTab(0)">상점 1 (재화 A)</div>
-        <div class="tab-btn" onclick="switchTab(1)">상점 2 (재화 B)</div>
-        <div class="tab-btn" onclick="switchTab(2)">상점 3 (재화 C)</div>
+        <div class="tab-btn active" onclick="switchTab(0)">
+            <img src="" class="tab-icon" alt="A" onerror="this.style.display='none'"> 
+            상점 1
+        </div>
+        <div class="tab-btn" onclick="switchTab(1)">
+            <img src="" class="tab-icon" alt="B" onerror="this.style.display='none'"> 
+            상점 2
+        </div>
+        <div class="tab-btn" onclick="switchTab(2)">
+            <img src="" class="tab-icon" alt="C" onerror="this.style.display='none'"> 
+            상점 3
+        </div>
     </div>
 
     <div id="shop-container"></div>
@@ -27,28 +56,24 @@
             </div>
             <div class="col">
                 <label>현재 보유량</label>
-                <input type="number" id="currentAmount" class="main-input" placeholder="0" oninput="calculate()">
+                <input type="number" id="currentAmount" class="main-input" placeholder="0" oninput="updateCurrent(this.value)">
             </div>
         </div>
 
         <div class="row">
             <div class="col">
-                <label>스테이지 드랍량</label>
-                <input type="number" id="baseDrop" class="main-input" value="30" oninput="calculate()">
+                <label>추천 스테이지 (자동 분석)</label>
+                <div class="recommend-box">
+                    <div class="rec-label">BEST STAGE</div>
+                    <div id="recStageName" class="rec-name">계산 중...</div>
+                    <div id="recStageInfo" class="rec-info">-</div>
+                </div>
             </div>
+            
             <div class="col">
                 <label>학생 보너스 합계 (%)</label>
-                <select id="bonusRate" onchange="calculate()">
-                    <option value="0">0%</option>
-                    <option value="20">20%</option>
-                    <option value="40">40%</option>
-                    <option value="60">60%</option>
-                    <option value="80">80%</option>
-                    <option value="90">90%</option>
-                    <option value="100">100%</option>
-                    <option value="120">120%</option>
-                    <option value="140">140%</option>
-                </select>
+                <select id="bonusRate" class="main-input" onchange="calculate()">
+                    </select>
             </div>
         </div>
 
@@ -56,9 +81,21 @@
             <div class="res-title">필요 소탕 횟수</div>
             <div id="result-runs" class="res-value">0회</div>
             <div id="result-ap" class="res-sub">(총 0 AP 소모)</div>
+            <div id="result-surplus"></div>
         </div>
     </div>
-</div>
+
+    <div class="drop-info-area">
+        <h2>📅 스테이지 드랍 테이블</h2>
+        <div class="drop-table-header">
+            <span>지역명 (AP)</span>
+            <span>드랍 아이템</span>
+        </div>
+        <div id="drop-table-list">
+            </div>
+    </div>
+    
+    </div>
 
 <script src="script.js" defer></script>
 
