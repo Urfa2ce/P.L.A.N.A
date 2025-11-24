@@ -1,0 +1,266 @@
+/* =========================================
+   1. 기본 변수 및 레이아웃
+   ========================================= */
+:root {
+    --ba-blue: #128CFF;
+    --ba-cyan: #00D1FF;
+    --ba-dark: #2B3A42;
+    --ba-bg: #F3F7F8;
+    --ba-gray: #D0D7DB;
+    --tab-active: #FFE500; 
+}
+
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background-color: var(--ba-bg);
+    color: var(--ba-dark);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.container {
+    width: 100%;
+    max-width: 800px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    padding: 25px;
+    box-sizing: border-box;
+}
+
+h1 {
+    text-align: center;
+    color: var(--ba-blue);
+    margin-bottom: 20px;
+    font-weight: 800;
+}
+
+/* =========================================
+   2. 탭 및 그리드 시스템
+   ========================================= */
+.shop-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    justify-content: center;
+}
+
+.tab-btn {
+    padding: 10px 20px;
+    border: 2px solid var(--ba-gray);
+    background: white;
+    border-radius: 30px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex: 1;
+    text-align: center;
+    color: #777;
+    white-space: nowrap; /* 탭 이름 줄바꿈 방지 */
+}
+
+.tab-btn.active {
+    background-color: var(--tab-active);
+    border-color: var(--tab-active);
+    color: #333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(255, 229, 0, 0.4);
+}
+
+.shop-section { display: none; }
+.shop-section.active {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px; /* 카드 간격 넓힘 */
+    margin-bottom: 30px;
+}
+
+@media (max-width: 600px) {
+    .shop-section.active {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* =========================================
+   3. 아이템 카드 디자인 (핵심 수정)
+   ========================================= */
+.item-card {
+    border: 2px solid #eee;
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+    background: #fff;
+    position: relative;
+    transition: 0.2s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* 내용이 적어도 카드가 꽉 차게 */
+}
+
+.item-card.selected {
+    border-color: var(--ba-blue);
+    background-color: #F0F9FF;
+}
+
+.item-card.disabled {
+    opacity: 0.6;
+    background-color: #f9f9f9;
+    pointer-events: none;
+}
+
+.item-checkbox {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    z-index: 10;
+}
+
+/* --- 상단 정보 영역 (이름, 이미지, 제한, 가격) --- */
+.card-top {
+    margin-bottom: 10px;
+    border-bottom: 1px dashed #eee;
+    padding-bottom: 8px;
+}
+
+/* [요청사항] 아이템 이름 2줄 제한 */
+/* style.css에서 .item-name 부분을 찾아 수정하세요 */
+
+.item-name {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 8px;
+    
+    /* ▼▼▼ [핵심 수정] 이 줄을 추가해야 \n이 먹힙니다 ▼▼▼ */
+    white-space: pre-line; 
+    
+    /* 2줄 제한 로직 (유지) */
+    display: -webkit-box;
+    -webkit-line-clamp: 2; 
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    
+    /* 높이 고정 (유지) */
+    height: 2.6em; 
+    line-height: 1.3;
+    padding: 0 5px;
+}
+
+.img-box {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 10px;
+    background: #fafafa;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e0e0e0;
+}
+
+.img-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* 구매 제한 배지 */
+.limit-badge {
+    font-size: 0.75rem;
+    background: #f0f0f0;
+    color: #666;
+    padding: 3px 8px;
+    border-radius: 12px;
+    display: inline-block;
+    border: 1px solid #ddd;
+    margin-bottom: 8px; /* 가격표와의 간격 */
+}
+
+/* 가격 표시 */
+.price-tag {
+    background-color: #EAF4FF;
+    color: #128CFF;
+    border-radius: 5px;
+    padding: 5px 0;
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+.price-tag span {
+    font-size: 0.75rem;
+    color: #7F9EB8;
+    margin-right: 4px;
+    font-weight: normal;
+}
+
+/* =========================================
+   4. 하단 컨트롤 (슬라이더 + 숫자 입력)
+   ========================================= */
+.control-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: auto; /* 카드 하단에 고정 */
+}
+
+input[type=range] {
+    flex: 1;
+    cursor: pointer;
+    accent-color: var(--ba-blue);
+    height: 5px;
+}
+
+/* 작은 숫자 입력창 */
+.qty-input-sm {
+    width: 50px;
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+    background: white;
+    box-sizing: border-box; /* 패딩 포함 크기 계산 */
+}
+
+.qty-input-sm:focus {
+    border-color: var(--ba-blue);
+    outline: none;
+}
+
+/* =========================================
+   5. 하단 계산기 결과창
+   ========================================= */
+.calc-area {
+    background-color: #FAFAFA;
+    border-top: 2px dashed var(--ba-gray);
+    padding-top: 25px;
+    margin-top: 20px;
+}
+
+.row { display: flex; gap: 15px; margin-bottom: 15px; }
+.col { flex: 1; }
+label { display: block; font-size: 0.9rem; font-weight: bold; color: #555; margin-bottom: 5px;}
+select, .main-input { padding: 10px; border: 2px solid #ccc; border-radius: 8px; width: 100%; box-sizing: border-box; }
+.main-input[readonly] { background: #eee; color: var(--ba-blue); font-weight: bold; }
+
+.result-box {
+    background: linear-gradient(135deg, var(--ba-blue), var(--ba-cyan));
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+    margin-top: 20px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(18, 140, 255, 0.3);
+}
+.res-title { font-size: 1rem; opacity: 0.9; margin-bottom: 5px; }
+.res-value { font-size: 2.2rem; font-weight: 900; }
+.res-sub { font-size: 0.9rem; margin-top: 5px; }
