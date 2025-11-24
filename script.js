@@ -7,6 +7,7 @@ const DEFAULT_IMG = "marieyon.png";
 // JSON에서 불러올 변수들 (초기값)
 let currencyIcons = []; 
 let tabMap = [];        
+let itemMap = {}; // [NEW] 아이템 매핑용 사전
 let shopConfig = [];    
 let stageConfig = [];   
 
@@ -15,12 +16,17 @@ let tabTotals = [0, 0, 0];
 let globalCurrentAmounts = [0, 0, 0];
 
 // ============================================================
-// 2. 데이터 로딩 및 초기화
+// 2. 데이터 로딩 및 초기화 (JSON Fetch)
 // ============================================================
 async function loadDataAndInit() {
     try {
+        // 'data.json' 파일을 비동기로 요청
         const response = await fetch('data.json');
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
 
         // 1. 설정 정보 가져오기
@@ -33,12 +39,15 @@ async function loadDataAndInit() {
             tabMap = [1, 2, 3];
         }
 
-        // 2. 데이터 정보 가져오기
+        // 2. 아이템 매핑 정보 가져오기 (없으면 빈 객체)
+        itemMap = data.itemMap || {};
+
+        // 3. 데이터 정보 가져오기
         shopConfig = data.shopConfig;
         stageConfig = data.stageConfig;
 
-        // 3. 화면 그리기 (순서 중요)
-        initTabs();      // [NEW] 탭 버튼 생성 (이미지 적용)
+        // 4. 화면 그리기 (순서 중요)
+        initTabs();      // 탭 버튼 생성
         initShop();      // 상점 아이템 생성
         initBonus();     // 보너스 목록 생성
         initDropTable(); // 드랍 테이블 생성
@@ -52,26 +61,23 @@ async function loadDataAndInit() {
 }
 
 // ============================================================
-// 3. [NEW] 상점 탭 생성 함수 (JSON 데이터 반영)
+// 3. 화면 생성 함수들
 // ============================================================
+
 function initTabs() {
     const tabContainer = document.querySelector('.shop-tabs');
     if (!tabContainer) return;
-    tabContainer.innerHTML = ''; // 기존 하드코딩된 탭 삭제
+    tabContainer.innerHTML = ''; 
 
-    // 상점 3개 생성 (0, 1, 2)
     for (let i = 0; i < 3; i++) {
-        // 현재 탭이 사용하는 재화 인덱스 가져오기 (매핑)
         const dropIdx = tabMap[i]; 
         const iconName = currencyIcons[dropIdx] || DEFAULT_IMG;
         const iconPath = IMG_PATH + iconName;
 
         const div = document.createElement('div');
-        // 첫 번째 탭은 active 클래스 추가
         div.className = `tab-btn ${i === currentTab ? 'active' : ''}`;
         div.onclick = () => switchTab(i);
         
-        // HTML 조립 (이미지 + 텍스트)
         div.innerHTML = `
             <img src="${iconPath}" class="tab-icon" onerror="this.style.display='none'"> 
             상점 ${i + 1}
@@ -80,10 +86,6 @@ function initTabs() {
         tabContainer.appendChild(div);
     }
 }
-
-// ============================================================
-// 4. 나머지 화면 생성 함수들
-// ============================================================
 
 function initShop() {
     const container = document.getElementById('shop-container');
@@ -178,41 +180,71 @@ function initBonus() {
     }
     select.value = 0;
 }
-
+// ============================================================
+// [수정] 드랍 테이블 (모든 아이템을 우측 회색 영역에 표시)
+// ============================================================
 function initDropTable() {
     const container = document.getElementById('drop-table-list');
     if (!container) return;
     container.innerHTML = '';
 
+    // 현재 선택된 보너스 %
+    const bonusPercent = parseInt(document.getElementById('bonusRate').value) || 0;
+
     stageConfig.forEach((stage) => {
         const row = document.createElement('div');
         row.className = 'stage-row';
 
-        let dropsHtml = '';
+        // 이제 중간 영역(base-area)은 쓰지 않으므로 비워둡니다.
+        let baseHtml = ''; 
         
+        // 모든 아이템(기본+보너스)을 담을 우측 영역 변수
+        let allDropsHtml = ''; 
+
         if (stage.drops) {
-            stage.drops.forEach((amount, idx) => {
-                if (amount && amount > 0) {
+            stage.drops.forEach((baseAmount, idx) => {
+                if (baseAmount && baseAmount > 0) {
                     const iconName = currencyIcons[idx] || DEFAULT_IMG;
                     const iconPath = IMG_PATH + iconName;
                     
-                    dropsHtml += `
-                        <div class="drop-badge" title="${amount}개">
-                            <img src="${iconPath}" onerror="this.src='${DEFAULT_IMG}'">
-                            <span>x${amount}</span>
+                    // 1. [기본 드랍] 배지 생성 -> 우측 영역에 추가
+                    allDropsHtml += `
+                        <div class="drop-badge" title="기본 드랍: ${baseAmount}개">
+                            <img src="${iconPath}" onerror="this.style.display='none'">
+                            <span>x${baseAmount}</span>
                         </div>
                     `;
+
+                    // 2. [보너스 드랍] 배지 생성 -> 우측 영역에 이어서 추가
+                    if (bonusPercent > 0) {
+                        const bonusAmount = Math.ceil(baseAmount * (bonusPercent / 100));
+                        
+                        if (bonusAmount > 0) {
+                            allDropsHtml += `
+                                <div class="drop-badge bonus-drop" title="보너스 추가: +${bonusAmount}">
+                                    <span class="table-bonus-badge">Bonus</span>
+                                    <img src="${iconPath}" onerror="this.style.display='none'">
+                                    <span>+${bonusAmount}</span>
+                                </div>
+                            `;
+                        }
+                    }
                 }
             });
         }
 
+        // HTML 조립
         row.innerHTML = `
             <div class="stage-info">
                 <div class="stage-title">${stage.name}</div>
                 <div class="stage-ap-badge">${stage.ap} AP</div>
             </div>
-            <div class="stage-items">
-                ${dropsHtml || '<span style="color:#ccc; font-size:0.8rem;">드랍 없음</span>'}
+
+            <div class="base-area">
+                </div>
+            
+            <div class="bonus-area">
+                ${allDropsHtml || '<span style="font-size:0.8rem; color:#ccc;">-</span>'}
             </div>
         `;
 
@@ -366,6 +398,7 @@ window.calculate = function() {
         let totalEffectiveGain = 0; 
         let currentGains = [];
 
+        // drops 배열 순회
         if(stage.drops) {
             for(let dropIdx=0; dropIdx < stage.drops.length; dropIdx++) {
                 const baseDrop = stage.drops[dropIdx];
@@ -418,14 +451,20 @@ window.calculate = function() {
     const surplus = (totalFarmed - currentTabNeed);
 
     displayResult(bestStage, maxRunsNeeded, totalAp, bestGainInfo, surplus);
+    initDropTable();
 }
-
+// ============================================================
+// [수정] 결과 표시 (기본 + 보너스 분리 표시)
+// ============================================================
 function displayResult(stage, runs, ap, gains, surplus, isDone = false) {
     const recNameEl = document.getElementById('recStageName');
     const recInfoEl = document.getElementById('recStageInfo');
     const resRunsEl = document.getElementById('result-runs');
     const resApEl = document.getElementById('result-ap');
     let surplusEl = document.getElementById('result-surplus');
+
+    // 보너스 % 가져오기
+    const bonusPercent = parseInt(document.getElementById('bonusRate').value) || 0;
 
     if (!surplusEl) {
         const resultBox = document.querySelector('.result-box');
@@ -436,9 +475,9 @@ function displayResult(stage, runs, ap, gains, surplus, isDone = false) {
     }
 
     if (isDone) {
-        recNameEl.innerText = "입력 대기중";
+        recNameEl.innerText = "졸업 완료! 🎉";
         recNameEl.style.color = "#128CFF";
-        recInfoEl.innerText = "입력 대기중";
+        recInfoEl.innerText = "모든 재화를 모았습니다.";
         resRunsEl.innerText = "0회";
         resApEl.innerText = "-";
         surplusEl.innerHTML = "";
@@ -458,21 +497,47 @@ function displayResult(stage, runs, ap, gains, surplus, isDone = false) {
     recNameEl.innerText = stage.name;
     recNameEl.style.color = "#128CFF";
     
+    // ▼▼▼ [핵심 수정] 기본/보너스 분리 로직 ▼▼▼
     let gainHtml = [];
-    for(let i=0; i < gains.length; i++) {
-        if(gains[i] > 0) {
-            const iconName = currencyIcons[i] || DEFAULT_IMG;
-            const iconPath = IMG_PATH + iconName;
+    
+    // stage.drops 배열(0~3)을 순회하며 직접 계산해서 표시
+    if (stage.drops) {
+        for(let i=0; i < stage.drops.length; i++) {
+            const baseAmount = stage.drops[i];
             
-            gainHtml.push(`
-                <span class="gain-item">
-                    <img src="${iconPath}" onerror="this.style.display='none'" class="mini-icon">
-                    <b>${gains[i]}</b>
-                </span>
-            `);
+            // 기본 드랍이 있는 경우에만 처리
+            if(baseAmount && baseAmount > 0) {
+                const iconName = currencyIcons[i] || DEFAULT_IMG;
+                const iconPath = IMG_PATH + iconName;
+                
+                // 1. [기본] 아이템 표시 (배지 없음)
+                gainHtml.push(`
+                    <span class="gain-item" title="기본 드랍">
+                        <img src="${iconPath}" onerror="this.style.display='none'" class="mini-icon">
+                        <b>x${baseAmount}</b>
+                    </span>
+                `);
+
+                // 2. [보너스] 아이템 표시 (조건부 생성)
+                if (bonusPercent > 0) {
+                    // 보너스 수량 계산 (올림 처리)
+                    const bonusAmount = Math.ceil(baseAmount * (bonusPercent / 100));
+                    
+                    if (bonusAmount > 0) {
+                        gainHtml.push(`
+                            <span class="gain-item" title="추가 보너스 (+${bonusPercent}%)">
+                                <span class="bonus-badge">Bonus</span> <img src="${iconPath}" onerror="this.style.display='none'" class="mini-icon">
+                                <b>x${bonusAmount}</b>
+                            </span>
+                        `);
+                    }
+                }
+            }
         }
     }
-    recInfoEl.innerHTML = `1회: [ ${gainHtml.join('')} ] <span style="font-size:0.8em; color:#888;">(AP ${stage.ap})</span>`;
+    // ▲▲▲ 수정 끝 ▲▲▲
+
+    recInfoEl.innerHTML = `1회: ${gainHtml.join('')} <div style="margin-top:5px; font-size:0.85em; color:#eee;">(AP ${stage.ap})</div>`;
 
     resRunsEl.innerText = runs.toLocaleString() + "회";
     resApEl.innerText = `(총 ${ap.toLocaleString()} AP)`;
