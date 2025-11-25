@@ -1,9 +1,16 @@
+// ============================================================
+// 1. 전역 변수 및 설정
+// ============================================================
 const IMG_PATH = "src/"; 
 const DEFAULT_IMG = "marieyon.png";
 const AP_ICON_PATH = "src/ui/Currency_Icon_AP.png";
 
 let currencyIcons = []; 
-let tabMap = [];        
+let tabMap = []; 
+let shopTabIcons = [];       
+let bonusDashboardIcons = []; 
+     
+let tabDisplayMap = []; 
 let itemMap = {}; 
 let shopConfig = [];    
 let stageConfig = [];   
@@ -15,9 +22,8 @@ let globalCurrentAmounts = [0, 0, 0];
 
 let selectedStudents = new Set(); 
 let activeRoles = new Set(['STRIKER', 'SPECIAL']); 
-
-// [NEW] 현재 선택된 보너스 필터 (-1: 없음, 0~2: 해당 인덱스 재화 필터)
 let activeBonusFilter = -1;
+let currentAcademy = "ALL";
 
 // ============================================================
 // 2. 데이터 로딩
@@ -30,7 +36,10 @@ async function loadDataAndInit() {
 
         if (data.eventSettings) {
             currencyIcons = data.eventSettings.currencyIcons || [];
-            tabMap = data.eventSettings.tabMap || [0, 1, 2];
+            tabMap = data.eventSettings.tabMap || [0, 1, 3];
+            tabDisplayMap = data.eventSettings.tabDisplayMap || tabMap;
+            shopTabIcons = data.eventSettings.shopTabIcons || [1, 2, 3];
+            bonusDashboardIcons = data.eventSettings.bonusDashboardIcons || [0, 1, 2];
         }
 
         itemMap = data.itemMap || {};
@@ -43,16 +52,19 @@ async function loadDataAndInit() {
                 const rawChars = await charRes.json();
                 const bonusMap = data.studentBonuses || {};
                 
-                studentData = rawChars.map(char => {
-                    const eventBonus = bonusMap[char.name] || [0, 0, 0];
-                    return { ...char, bonus: eventBonus };
-                });
+                // [수정됨] data.json에 정의된 학생만 필터링해서 로드
+                studentData = rawChars
+                    .filter(char => bonusMap.hasOwnProperty(char.name)) // 보너스 목록에 있는 이름만 통과
+                    .map(char => {
+                        return { ...char, bonus: bonusMap[char.name] };
+                    });
             }
         } catch (e) { console.error(e); }
 
         initTabs();      
         initShop();      
         initStageFilters(); 
+        initAcademyFilter();
         initStudentBonus(); 
         initDropTable(); 
         updateBonusDashboardIcons();
@@ -64,52 +76,56 @@ async function loadDataAndInit() {
     }
 }
 
+// 보너스 현황판 아이콘 업데이트
 function updateBonusDashboardIcons() {
     for(let i=0; i<3; i++) {
-        const dropIdx = tabMap[i]; 
+        const displayIdx = bonusDashboardIcons[i];
         const iconEl = document.getElementById(`bd-icon-${i}`);
-        if(iconEl && currencyIcons[dropIdx]) {
-            iconEl.src = IMG_PATH + currencyIcons[dropIdx];
+        if(iconEl && currencyIcons[displayIdx]) {
+            iconEl.src = IMG_PATH + currencyIcons[displayIdx];
             iconEl.style.display = 'block';
         }
     }
 }
 
-// ============================================================
-// 3. 학생 보너스 & 현황판 로직 (핵심 기능 추가됨)
-// ============================================================
-
-// [NEW] 상단 재화 아이콘 클릭 시 필터링 토글
-window.toggleBonusFilter = function(filterIdx) {
-    // 이미 선택된 걸 다시 누르면 해제 (-1)
-    if (activeBonusFilter === filterIdx) {
-        activeBonusFilter = -1;
-    } else {
-        activeBonusFilter = filterIdx;
-    }
+// 학원 필터 초기화
+function initAcademyFilter() {
+    const select = document.getElementById('academyFilter');
+    if (!select) return;
     
-    // UI 갱신 (선택된 아이템에 파란 테두리)
+    // 기존 옵션 초기화 (전체 보기 제외)
+    select.innerHTML = '<option value="ALL">전체 학원 보기</option>';
+
+    const academies = new Set();
+    studentData.forEach(s => { if (s.academy) academies.add(s.academy); });
+    const sorted = Array.from(academies).sort();
+    
+    sorted.forEach(ac => {
+        const opt = document.createElement('option');
+        opt.value = ac; opt.text = ac;
+        select.appendChild(opt);
+    });
+}
+window.filterByAcademy = function(ac) { currentAcademy = ac; initStudentBonus(); }
+
+// ============================================================
+// 3. 학생 보너스 로직
+// ============================================================
+window.toggleBonusFilter = function(filterIdx) {
+    if (activeBonusFilter === filterIdx) activeBonusFilter = -1;
+    else activeBonusFilter = filterIdx;
+    
     for(let i=0; i<3; i++) {
         const item = document.getElementById(`bd-item-${i}`);
         if (i === activeBonusFilter) item.classList.add('active');
         else item.classList.remove('active');
     }
-
-    // 학생 목록 다시 그리기
     initStudentBonus();
 }
 
-// 역할군 필터 (STRIKER / SPECIAL)
 window.toggleRoleFilter = function(role, btn) {
-    // 재화 필터가 켜져있으면 역할군 필터는 동작 안 하게 막거나, 
-    // 혹은 같이 동작하게 할 수 있음. 여기선 '같이 동작'하도록 둠.
-    if (activeRoles.has(role)) {
-        activeRoles.delete(role);
-        btn.classList.remove('active');
-    } else {
-        activeRoles.add(role);
-        btn.classList.add('active');
-    }
+    if (activeRoles.has(role)) { activeRoles.delete(role); btn.classList.remove('active'); }
+    else { activeRoles.add(role); btn.classList.add('active'); }
     initStudentBonus();
 }
 
@@ -123,20 +139,19 @@ function initStudentBonus() {
         return;
     }
 
-    // [핵심] 어떤 보너스 수치를 보여줄 것인가?
-    // 재화 필터가 켜져있으면 그 재화 기준, 아니면 현재 상점 탭 기준
     const isFiltering = (activeBonusFilter !== -1);
+    // 정렬 기준: 필터가 켜져있으면 필터 재화 기준, 아니면 현재 상점 탭 기준
     const targetBonusIdx = isFiltering ? activeBonusFilter : currentTab;
 
-    // 1. 필터링 로직
-    const filtered = studentData.filter(student => {
-        // (1) 재화 필터가 켜져있다면? -> 해당 보너스가 0보다 큰 학생만 통과
+    // 1. 필터링
+    let filtered = studentData.filter(student => {
         if (isFiltering) {
-            const bonusVal = Array.isArray(student.bonus) ? (student.bonus[targetBonusIdx] || 0) : student.bonus;
-            return bonusVal > 0;
+            const b = Array.isArray(student.bonus) ? (student.bonus[targetBonusIdx]||0) : student.bonus;
+            if (b <= 0) return false;
         }
-        // (2) 꺼져있다면? -> 기존 역할군(Striker/Special) 필터 적용
-        return (!student.role || activeRoles.has(student.role));
+        if (!(!student.role || activeRoles.has(student.role))) return false;
+        if (currentAcademy !== "ALL" && student.academy !== currentAcademy) return false;
+        return true;
     });
 
     if (filtered.length === 0) {
@@ -144,7 +159,14 @@ function initStudentBonus() {
         return;
     }
 
-    // 2. 카드 생성
+    // [NEW] 2. 내림차순 정렬 (보너스 높은 순)
+    filtered.sort((a, b) => {
+        const valA = Array.isArray(a.bonus) ? (a.bonus[targetBonusIdx]||0) : a.bonus;
+        const valB = Array.isArray(b.bonus) ? (b.bonus[targetBonusIdx]||0) : b.bonus;
+        return valB - valA; // 큰 값이 앞으로
+    });
+
+    // 3. 카드 생성
     filtered.forEach(student => {
         const originalIdx = studentData.indexOf(student);
         const card = document.createElement('div');
@@ -153,7 +175,7 @@ function initStudentBonus() {
         
         card.onclick = () => toggleStudent(originalIdx, card);
 
-        // 표시할 보너스 수치 가져오기
+        // 표시할 보너스 값 계산
         let displayBonus = 0;
         if(Array.isArray(student.bonus)) {
             displayBonus = student.bonus[targetBonusIdx] || 0;
@@ -162,69 +184,90 @@ function initStudentBonus() {
         }
 
         const imgSrc = student.img ? (IMG_PATH + student.img) : DEFAULT_IMG;
+        
+        // [NEW] 필터 미선택 시 보너스 텍스트 숨김 처리
+        // isFiltering이 true(클릭됨)일 때만 텍스트를 보여줌
+        const bonusText = isFiltering ? `+${displayBonus}%` : '';
+        const barStyle = isFiltering ? '' : 'display:none;';
+
         card.innerHTML = `
             <div class="card-inner">
                 <img src="${imgSrc}" class="student-img" onerror="this.src='${DEFAULT_IMG}'">
                 <div class="check-badge">✔</div>
             </div>
-            <div class="bonus-tag-bar">+${displayBonus}%</div>
+            <div class="bonus-tag-bar" style="${barStyle}">${bonusText}</div>
         `;
         grid.appendChild(card);
     });
 }
 
 window.toggleStudent = function(idx, card) {
-    if (selectedStudents.has(idx)) {
-        selectedStudents.delete(idx);
-        card.classList.remove('selected');
-    } else {
-        selectedStudents.add(idx);
-        card.classList.add('selected');
-    }
+    if (selectedStudents.has(idx)) { selectedStudents.delete(idx); card.classList.remove('selected'); }
+    else { selectedStudents.add(idx); card.classList.add('selected'); }
     updateTotalBonus();
 }
 
+// [핵심 수정] 선택된 인원 중 (스트라이커 4 + 스페셜 2) 최적값 자동 계산
+// [수정] 학생 선택 시 최적값 계산 후 -> 입력창(Input)에 자동 입력 -> 계산 실행
 function updateTotalBonus() {
     let totals = [0, 0, 0];
 
-    selectedStudents.forEach(idx => {
-        const s = studentData[idx];
-        if(s) {
-            if(Array.isArray(s.bonus)) {
-                totals[0] += (s.bonus[0] || 0);
-                totals[1] += (s.bonus[1] || 0);
-                totals[2] += (s.bonus[2] || 0);
-            } else {
-                totals[0] += s.bonus;
-                totals[1] += s.bonus;
-                totals[2] += s.bonus;
-            }
-        }
-    });
+    // 1. 0, 1, 2번 재화별로 각각 최적의 보너스 합계 계산 (스트라이커 4 + 스페셜 2)
+    for(let i = 0; i < 3; i++) {
+        let strikers = [];
+        let specials = [];
 
-    // 현황판 갱신
-    for(let i=0; i<3; i++) {
+        selectedStudents.forEach(idx => {
+            const s = studentData[idx];
+            if (s) {
+                // 해당 재화(i)에 대한 보너스 값 추출 (배열이면 i번째, 아니면 단일값)
+                let val = Array.isArray(s.bonus) ? (s.bonus[i] || 0) : (s.bonus || 0);
+                
+                if (s.role === 'SPECIAL') specials.push(val);
+                else strikers.push(val); // role이 없거나 STRIKER면 스트라이커 취급
+            }
+        });
+
+        // 내림차순 정렬 (높은 보너스 우선)
+        strikers.sort((a, b) => b - a);
+        specials.sort((a, b) => b - a);
+
+        // 상위 n명 합산
+        const sumStrikers = strikers.slice(0, 4).reduce((acc, curr) => acc + curr, 0);
+        const sumSpecials = specials.slice(0, 2).reduce((acc, curr) => acc + curr, 0);
+        
+        totals[i] = sumStrikers + sumSpecials;
+    }
+
+    // 2. 상단 현황판(아이콘 옆 숫자) 갱신
+    for(let i = 0; i < 3; i++) {
         const valEl = document.getElementById(`bd-val-${i}`);
         if(valEl) valEl.innerText = totals[i] + "%";
     }
 
-    // 메인 입력칸 갱신 (현재 탭 기준)
-    const mainInput = document.getElementById('bonusRate');
-    if(mainInput) mainInput.value = totals[currentTab];
+    // 3. 현재 선택된 탭의 보너스 값을 가져옴
+    const currentTotal = totals[currentTab];
 
+    // 4. 헤더 배지 갱신
+    const badge = document.getElementById('totalStudentBonusBadge');
+    if(badge) badge.innerText = currentTotal + "%";
+
+    // 5. [핵심] 메인 입력창(#bonusRate)에 계산된 값을 강제로 넣음
+    const mainInput = document.getElementById('bonusRate');
+    if(mainInput) {
+        mainInput.value = currentTotal;
+    }
+
+    // 6. 값이 바뀌었으니 전체 계산 다시 실행 (드랍 테이블 갱신됨)
     calculate();
+    initDropTable();
 }
 
 window.toggleStudentSelector = function() {
     const box = document.getElementById('studentSelectorBox');
     const icon = document.getElementById('studentToggleIcon');
-    if (box.classList.contains('hidden')) {
-        box.classList.remove('hidden');
-        icon.innerText = "▲";
-    } else {
-        box.classList.add('hidden');
-        icon.innerText = "▼";
-    }
+    if (box.classList.contains('hidden')) { box.classList.remove('hidden'); icon.innerText = "▲"; }
+    else { box.classList.add('hidden'); icon.innerText = "▼"; }
 }
 
 // ============================================================
@@ -234,7 +277,10 @@ function initTabs() {
     const con = document.querySelector('.shop-tabs');
     con.innerHTML = '';
     for(let i=0; i<3; i++) {
-        const icon = (currencyIcons[tabMap[i]]) ? IMG_PATH+currencyIcons[tabMap[i]] : DEFAULT_IMG;
+        const displayIdx = (shopTabIcons && shopTabIcons.length > i) ? shopTabIcons[i] : tabMap[i];
+        
+        const icon = (currencyIcons[displayIdx]) ? IMG_PATH + currencyIcons[displayIdx] : DEFAULT_IMG;
+        
         const div = document.createElement('div');
         div.className = `tab-btn ${i===currentTab?'active':''}`;
         div.onclick = () => switchTab(i);
@@ -309,11 +355,6 @@ window.switchTab = function(idx) {
     document.querySelectorAll('.shop-section').forEach((s, i) => s.classList.toggle('active', i === idx));
     document.getElementById('targetAmount').value = tabTotals[idx];
     document.getElementById('currentAmount').value = globalCurrentAmounts[idx];
-    
-    // 탭 변경 시 필터 초기화 (사용자 편의상)
-    activeBonusFilter = -1;
-    for(let i=0; i<3; i++) document.getElementById(`bd-item-${i}`).classList.remove('active');
-    
     initStudentBonus(); 
     updateTotalBonus();
 }
@@ -348,7 +389,8 @@ window.calculate = function() {
         return;
     }
 
-    const bonusVal = parseInt(document.getElementById('bonusRate').value) || 0;
+    const bonusInput = document.getElementById('bonusRate');
+    const bonusVal = parseInt(bonusInput ? bonusInput.value : 0) || 0;
     let bestStage = null;
     let maxEff = -1; 
     let bestGains = [];
@@ -467,14 +509,15 @@ function displayResult(stage, runs, ap, gains, surplus, isDone=false) {
     
     apEl.innerHTML = `
         <div style="display:flex; align-items:center; justify-content:center; gap:4px;">
-            <img src="${AP_ICON_PATH}" style="width:35px; height:35px; object-fit:contain;">
-            <span>${ap.toLocaleString()+"AP"}</span>
+            <img src="${AP_ICON_PATH}" style="width:16px; height:16px; object-fit:contain;">
+            <span>${ap.toLocaleString()}</span>
         </div>
     `;
 
     if(surplus > 0) {
-        const icon = (currencyIcons[tabMap[currentTab]]) ? IMG_PATH+currencyIcons[tabMap[currentTab]] : DEFAULT_IMG;
-        surEl.innerHTML = `⚠️ <img src="${icon}" class="mini-icon-white" style="width:35px;height:35px"> ${surplus}개 초과 획득 예상`;
+        const displayIdx = tabDisplayMap[currentTab];
+        const icon = (currencyIcons[displayIdx]) ? IMG_PATH+currencyIcons[displayIdx] : DEFAULT_IMG;
+        surEl.innerHTML = `⚠️ <img src="${icon}" class="mini-icon-white" style="width:12px;height:12px"> ${surplus}개 남음`;
     } else {
         surEl.innerHTML = "";
     }

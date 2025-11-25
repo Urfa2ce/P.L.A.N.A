@@ -6,8 +6,9 @@
       "Texture2D/Item_Icon_Event_Token_2_S55.png",
       "Texture2D/Item_Icon_Event_Token_3_S55.png"
     ],
-    "tabMap": [1, 2, 0],
-    "tabDisplayMap": [1, 2, 3]
+    "tabMap": [1, 2, 3],
+    "shopTabIcons": [1, 2, 3],
+    "bonusDashboardIcons": [0, 1, 2]
   },
   "studentBonuses": {
     "타카네": [25, 0, 25],
@@ -23,7 +24,6 @@
     "아즈사": [15, 0, 15],
     "히나타": [0, 15, 15],
     "메루": [0, 15, 15],
-
     "나기사": [15, 0, 15],
     "시미코": [15, 15, 0],
     "마시로": [15, 0, 15],
@@ -32,7 +32,6 @@
     "히후미(수영복)": [15, 15, 0],
     "마리": [0, 15, 15],
     "하나코": [0, 15, 15]
-    
   },
   "itemMap": {
     "gold": "Texture2D/Currency_Icon_Gold.png",

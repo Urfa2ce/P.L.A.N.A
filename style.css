@@ -44,7 +44,7 @@ h1 {
 /* ==========================================================================
    2. 상단 탭 (Tabs)
    ========================================================================== */
-.shop-tabs {
+.shop-tabs { 
     display: flex;
     gap: 8px;
     margin-bottom: 25px;
@@ -651,18 +651,46 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
     transform: translateY(-1px);
 }
 .student-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 10px;
 }
 
+/* 학생 카드 디자인 (수정됨: 미선택 시 회색조) */
 .student-card {
-    background: white; border-radius: 8px; overflow: hidden; cursor: pointer;
-    position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border: 3px solid transparent; 
-    transition: transform 0.1s;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    border: 3px solid transparent;
+    
+    /* ▼▼▼ [핵심] 선택 안 된 상태: 흑백 + 반투명 ▼▼▼ */
+    opacity: 0.8;                /* 50% 투명도 */
+    filter: grayscale(100%);     /* 흑백 처리 */
+    transition: all 0.2s ease;   /* 부드럽게 변환 */
 }
-.student-card:active { transform: scale(0.98); }
 
+/* 마우스 올렸을 때: 살짝 선명해짐 */
+.student-card:hover {
+    opacity: 0.8;
+    filter: grayscale(0%); /* 컬러로 복구 */
+    transform: translateY(-2px);
+}
+
+/* 선택된 상태: 완전 선명 + 노란 테두리 */
 .student-card.selected {
-    border-color: #FFE500; box-shadow: 0 0 0 1px #FFE500, 0 4px 10px rgba(255, 229, 0, 0.5); z-index: 1;
+    opacity: 1;
+    filter: grayscale(0%);
+    border-color: #FFE500;
+    box-shadow: 0 0 0 1px #FFE500, 0 4px 10px rgba(255, 229, 0, 0.5);
+    z-index: 1;
+    transform: translateY(-2px);
+}
+
+/* 클릭하는 순간 눌리는 효과 */
+.student-card:active {
+    transform: scale(0.95);
 }
 
 .card-inner { position: relative; width: 100%; padding-top: 100%; background: #f0f0f0; }
@@ -673,11 +701,9 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
     font-size: 0.9rem; font-weight: 900; padding: 5px 0;
 }
 
-.check-badge {
-    position: absolute; top: 5px; right: 5px; background: #8BC34A; color: white; 
-    width: 20px; height: 20px; border-radius: 50%; font-size: 0.75rem; font-weight: bold;
-    display: none; align-items: center; justify-content: center; border: 2px solid white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+/* [수정됨] 체크 표시는 못생겨서 삭제 (화면에서 숨김) */
+.check-badge { 
+    display: none !important; 
 }
 .student-card.selected .check-badge { display: flex; }
 
