@@ -31,6 +31,24 @@
 <div class="container">
     <h1>이벤트 상점 계산기</h1>
 
+    <div class="bonus-widget-container">
+        <div class="bonus-toggle-header" onclick="toggleStudentSelector()">
+            <div class="b-title">
+                <span>🎓 학생 보너스 편성</span>
+                <span id="totalStudentBonusBadge" class="total-badge">0%</span>
+            </div>
+            <span id="studentToggleIcon">▼</span>
+        </div>
+
+        <div id="studentSelectorBox" class="student-selector-body hidden">
+            <div class="student-tabs">
+                <div class="s-tab active">STRIKER</div>
+                <div class="s-tab">SPECIAL</div>
+            </div>
+            <div id="student-grid" class="student-grid"></div>
+        </div>
+    </div>
+
     <div class="shop-tabs">
         <div class="tab-btn active" onclick="switchTab(0)">
             <img src="" class="tab-icon" alt="A" onerror="this.style.display='none'"> 
@@ -49,53 +67,63 @@
     <div id="shop-container"></div>
 
     <div class="calc-area">
-        <div class="row">
+        <div class="row inputs-row">
             <div class="col">
-                <label>필요 재화 (자동 합산)</label>
-                <input type="number" id="targetAmount" class="main-input" readonly>
+                <label>필요 재화</label>
+                <input type="number" id="targetAmount" class="main-input" placeholder="0" oninput="manualTarget(this.value)">
             </div>
             <div class="col">
-                <label>현재 보유량</label>
+                <label>현재 보유</label>
                 <input type="number" id="currentAmount" class="main-input" placeholder="0" oninput="updateCurrent(this.value)">
+            </div>
+            <div class="col">
+                <label>보너스 합계 (%)</label>
+                <select id="bonusRate" class="main-input" onchange="calculate()">
+                    </select>
             </div>
         </div>
 
-        <div class="row">
+        <div class="row result-row">
             <div class="col">
-                <label>추천 스테이지 (자동 분석)</label>
+                <label>추천 스테이지 (BEST)</label>
                 <div class="recommend-box">
-                    <div class="rec-label">BEST STAGE</div>
                     <div id="recStageName" class="rec-name">계산 중...</div>
                     <div id="recStageInfo" class="rec-info">-</div>
                 </div>
             </div>
             
             <div class="col">
-                <label>학생 보너스 합계 (%)</label>
-                <select id="bonusRate" class="main-input" onchange="calculate()">
-                    </select>
+                <label>최종 결과</label>
+                <div class="result-box compact-box">
+                    <div class="res-mini-title">필요 소탕</div>
+                    <div id="result-runs" class="res-value-sm">0회</div>
+                    <div id="result-ap" class="res-sub-sm">(0 AP)</div>
+                    <div id="result-surplus" class="res-surplus-sm"></div>
+                </div>
             </div>
-        </div>
-
-        <div class="result-box">
-            <div class="res-title">필요 소탕 횟수</div>
-            <div id="result-runs" class="res-value">0회</div>
-            <div id="result-ap" class="res-sub">(총 0 AP 소모)</div>
-            <div id="result-surplus"></div>
         </div>
     </div>
 
     <div class="drop-info-area">
+        <div class="filter-section">
+            <div class="filter-header">
+                <h3>🔍 계산할 지역 선택</h3>
+                <div class="filter-btns">
+                    <button class="small-btn" onclick="toggleAllStages(true)">전체 선택</button>
+                    <button class="small-btn outline" onclick="toggleAllStages(false)">전체 해제</button>
+                </div>
+            </div>
+            <div id="stage-filter-container" class="filter-grid"></div>
+        </div>
+
         <h2>📅 스테이지 드랍 테이블</h2>
         <div class="drop-table-header">
             <span>지역명 (AP)</span>
-            <span>드랍 아이템</span>
+            <span>드랍 아이템 (기본 + 보너스)</span>
         </div>
-        <div id="drop-table-list">
-            </div>
+        <div id="drop-table-list"></div>
     </div>
-    
-    </div>
+</div>
 
 <script src="script.js" defer></script>
 

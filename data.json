@@ -16,32 +16,54 @@
   },
   "shopConfig": [
     [
-      { "name": "최상급 BD", "img": "marix.png", "price": 1, "qty": 180 },
-      { "name": "상급 BD", "img": "bd_gold.png", "price": 4, "qty": 95 },
-      { "name": "중급 BD", "img": "bd_blue.png", "price": 15, "qty": 30 },
-      { "name": "비의서", "img": "secret_tech.png", "price": 60, "qty": 12 },
-      { "name": "크레딧 포인트", "img": "credit.png", "price": 5, "qty": 50 }
+      { "name": "초급 활동 보고서","img": "Texture2D/Item_Icon_ExpItem_0.png", "price": 1, "qty":90},
+      { "name": "일반 활동 보고서","img": "Texture2D/Equipment_Icon_Exp_1.png", "price": 3, "qty":95},
+      { "name": "상급 활동 보고서","img": "Texture2D/Equipment_Icon_Exp_2.png" , "price": 12, "qty":30},
+      { "name": "최상급 활동 보고서","img": "Texture2D/Equipment_Icon_Exp_3.png" , "price": 60, "qty":12},
+
+      { "name": "일반 전술 교육 BD\n(붉은겨울)","img": "Texture2D/Item_Icon_Material_ExSkill_RedWinter_0.png" , "price": 10 , "qty":30},
+      { "name": "기초 전술 교육 BD\n(붉은겨울)","img": "Texture2D/Item_Icon_Material_ExSkill_RedWinter_1.png" , "price": 30, "qty":18},
+      { "name": "상급 전술 교육 BD\n(붉은겨울)","img": "Texture2D/Item_Icon_Material_ExSkill_RedWinter_2.png" , "price": 100, "qty":12},
+      { "name": "최상급 전술 교육 BD\n(붉은겨울)","img": "Texture2D/Item_Icon_Material_ExSkill_RedWinter_3.png" , "price": 300, "qty":4},
+
+      { "name": "볼프세크 철광석","img": "Texture2D/Item_Icon_Material_Wolfsegg_0.png", "price": 5, "qty":150},
+      { "name": "볼프세크 철조각","img": "Texture2D/Item_Icon_Material_Wolfsegg_1.png", "price": 15, "qty":50},
+      { "name": "저순도 볼프세크 깅철","img": "Texture2D/Item_Icon_Material_Wolfsegg_2.png", "price": 50, "qty":30}, 
+      { "name": "고순도 볼프세크 강철","img": "Texture2D/Item_Icon_Material_Wolfsegg_3.png", "price": 200, "qty":11},
+      { "name": "총, 귀여움, 청춘","img": "Texture2D/Item_Icon_Favor_9.png", "price": 200, "qty":10},
+      { "name": "고전 시집","img": "Texture2D/Item_Icon_Favor_23.png", "price": 200, "qty":10},
+      { "name": "음악 연주회 입장권","img": "Texture2D/Item_Icon_Favor_Lv2_10.png", "price": 300, "qty":1},
+      { "name": "판매 영수증 묶음","img": "Texture2D/Item_Icon_Event_Token_2_S55.png", "price": 5, "qty":-1} 
     ],
     [
       { "name": "하급 강화석", "img": "Texture2D/Equipment_Icon_Exp_0.png", "price": 1, "qty": 180 },
       { "name": "일반 강화석", "img": "Texture2D/Equipment_Icon_Exp_1.png", "price": 4, "qty": 95 },
       { "name": "상급 강화석", "img": "Texture2D/Equipment_Icon_Exp_2.png", "price": 15, "qty": 30 },
       { "name": "최상급 강화석", "img": "Texture2D/Equipment_Icon_Exp_3.png", "price": 60, "qty": 12 },
-      { "name": "기초 기술 노트\n(레드윈터)", "img": "Texture2D/Item_Icon_SkillBook_RedWinter_0.png", "price": 5, "qty": 50 },
-      { "name": "일반 기술 노트\n(레드윈터)", "img": "Texture2D/Item_Icon_SkillBook_RedWinter_1.png", "price": 15, "qty": 38 },
-      { "name": "상급 기술 노트\n(레드윈터)", "img": "Texture2D/Item_Icon_SkillBook_RedWinter_2.png", "price": 50, "qty": 25 },
-      { "name": "최상급 기술 노트\n(레드윈터)", "img": "Texture2D/Item_Icon_SkillBook_RedWinter_3.png", "price": 200, "qty": 15 },
+
+      { "name": "기초 기술 노트\n(붉은겨울)", "img": "Texture2D/Item_Icon_SkillBook_RedWinter_0.png", "price": 5, "qty": 50 },
+      { "name": "일반 기술 노트\n(붉은겨울)", "img": "Texture2D/Item_Icon_SkillBook_RedWinter_1.png", "price": 15, "qty": 38 },
+      { "name": "상급 기술 노트\n(붉은겨울)", "img": "Texture2D/Item_Icon_SkillBook_RedWinter_2.png", "price": 50, "qty": 25 },
+      { "name": "최상급 기술 노트\n(붉은겨울)", "img": "Texture2D/Item_Icon_SkillBook_RedWinter_3.png", "price": 200, "qty": 15 },
+
       { "name": "파에스토스 원반 조각", "img": "Texture2D/Item_Icon_Material_Phaistos_0.png", "price": 5, "qty": 150 },
       { "name": "파손된 파에스토스 원반", "img": "Texture2D/Item_Icon_Material_Phaistos_1.png", "price": 15, "qty": 50 },
       { "name": "마모된 파에스토스 원반", "img": "Texture2D/Item_Icon_Material_Phaistos_2.png", "price": 50, "qty": 30 },
       { "name": "온전한 파에스토스 원반", "img": "Texture2D/Item_Icon_Material_Phaistos_3.png", "price": 200, "qty": 11 },
       { "name": "비싸보이는 금박 욕망의 항아리", "img": "Texture2D/Item_Icon_Favor_29.png", "price": 200, "qty": 10 },
+
       { "name": "금단의 연애", "img": "Texture2D/Item_Icon_Favor_3.png", "price": 200, "qty": 10 },
       { "name": "고풍스러운 달걀 공예품", "img": "Texture2D/Item_Icon_Favor_Lv2_3.png", "price": 300, "qty": 1 },
       { "name": "크레딧 포인트", "img": "Texture2D/Currency_Icon_Gold.png", "price": 5, "qty": -1 }
     ],
     [
-      { "name": "가구", "img": "furniture.png", "price": 1000, "qty": 1 }
+      { "name": "판매용 데스크", "img": "My_Event086_Salesdesk.png", "price": 20, "qty": 1 },
+      { "name": "엘리그마 x5", "img": "Item_Icon_SecretStone.png", "price": 20, "qty": 1 },
+      { "name": "비의서", "img": "Item_Icon_SkillBook_Ultimate.png", "price": 20, "qty": 1 },
+      { "name": "크레딧 포인트 1M", "img": "Currency_Icon_Gold.png", "price": 5, "qty": 5 },
+      { "name": "크레딧 포인트 500K", "img": "Currency_Icon_Gold.png", "price": 3, "qty": 10 },
+      { "name": "크레딧 포인트 150K", "img": "Currency_Icon_Gold.png", "price": 1, "qty": 25 },
+      { "name": "크레딧 포인트 55K", "img": "Currency_Icon_Gold.png", "price": 1, "qty": -1 }
     ]
   ],
   "stageConfig": [
