@@ -1,130 +1,217 @@
-// ============================================================
-// 1. 전역 변수 및 설정
-// ============================================================
 const IMG_PATH = "src/"; 
 const DEFAULT_IMG = "marieyon.png";
+const AP_ICON_PATH = "src/ui/Currency_Icon_AP.png";
 
-// JSON에서 불러올 변수들
 let currencyIcons = []; 
 let tabMap = [];        
 let itemMap = {}; 
 let shopConfig = [];    
 let stageConfig = [];   
 
+let studentData = []; 
 let currentTab = 0;
 let tabTotals = [0, 0, 0];
 let globalCurrentAmounts = [0, 0, 0];
 
-// 학생 데이터 (본인의 파일명으로 수정 필요)
-const studentData = [
-    { name: "미카", img: "Texture2D/Student_Portrait_Mika.png", bonus: 20 },
-    { name: "수시노", img: "Texture2D/Student_Portrait_Hoshino_Swimsuit.png", bonus: 20 },
-    { name: "코하루", img: "Texture2D/Student_Portrait_Koharu.png", bonus: 15 },
-    { name: "아즈사", img: "Texture2D/Student_Portrait_Azusa.png", bonus: 15 },
-    { name: "모모이", img: "Texture2D/Student_Portrait_Momoi.png", bonus: 15 },
-    { name: "미도리", img: "Texture2D/Student_Portrait_Midori.png", bonus: 15 },
-    { name: "유즈", img: "Texture2D/Student_Portrait_Yuzu.png", bonus: 10 },
-    { name: "아리스", img: "Texture2D/Student_Portrait_Aris.png", bonus: 10 }
-];
 let selectedStudents = new Set(); 
+let activeRoles = new Set(['STRIKER', 'SPECIAL']); 
+
+// [NEW] 현재 선택된 보너스 필터 (-1: 없음, 0~2: 해당 인덱스 재화 필터)
+let activeBonusFilter = -1;
 
 // ============================================================
-// 2. 데이터 로딩 및 초기화
+// 2. 데이터 로딩
 // ============================================================
 async function loadDataAndInit() {
     try {
         const response = await fetch('data.json');
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) throw new Error(`data.json load failed`);
         const data = await response.json();
 
         if (data.eventSettings) {
             currencyIcons = data.eventSettings.currencyIcons || [];
-            tabMap = data.eventSettings.tabMap || [1, 2, 3];
-        } else {
-            currencyIcons = ["icon_event_pt.png", "event_point_a.png", "event_point_b.png", "event_point_c.png"];
-            tabMap = [1, 2, 3];
+            tabMap = data.eventSettings.tabMap || [0, 1, 2];
         }
 
         itemMap = data.itemMap || {};
         shopConfig = data.shopConfig;
         stageConfig = data.stageConfig;
 
+        try {
+            const charRes = await fetch('characters.json');
+            if (charRes.ok) {
+                const rawChars = await charRes.json();
+                const bonusMap = data.studentBonuses || {};
+                
+                studentData = rawChars.map(char => {
+                    const eventBonus = bonusMap[char.name] || [0, 0, 0];
+                    return { ...char, bonus: eventBonus };
+                });
+            }
+        } catch (e) { console.error(e); }
+
         initTabs();      
         initShop();      
-        initBonus();     
         initStageFilters(); 
-        initStudentBonus(); // 학생 보너스 생성
+        initStudentBonus(); 
         initDropTable(); 
-        
+        updateBonusDashboardIcons();
         calculate();     
 
     } catch (error) {
-        console.error("데이터 로딩 실패:", error);
-        alert("data.json 로딩 실패! (Live Server 확인 필요)");
+        console.error(error);
+        alert("Live Server 확인 필요");
+    }
+}
+
+function updateBonusDashboardIcons() {
+    for(let i=0; i<3; i++) {
+        const dropIdx = tabMap[i]; 
+        const iconEl = document.getElementById(`bd-icon-${i}`);
+        if(iconEl && currencyIcons[dropIdx]) {
+            iconEl.src = IMG_PATH + currencyIcons[dropIdx];
+            iconEl.style.display = 'block';
+        }
     }
 }
 
 // ============================================================
-// 3. 학생 보너스 기능
+// 3. 학생 보너스 & 현황판 로직 (핵심 기능 추가됨)
 // ============================================================
+
+// [NEW] 상단 재화 아이콘 클릭 시 필터링 토글
+window.toggleBonusFilter = function(filterIdx) {
+    // 이미 선택된 걸 다시 누르면 해제 (-1)
+    if (activeBonusFilter === filterIdx) {
+        activeBonusFilter = -1;
+    } else {
+        activeBonusFilter = filterIdx;
+    }
+    
+    // UI 갱신 (선택된 아이템에 파란 테두리)
+    for(let i=0; i<3; i++) {
+        const item = document.getElementById(`bd-item-${i}`);
+        if (i === activeBonusFilter) item.classList.add('active');
+        else item.classList.remove('active');
+    }
+
+    // 학생 목록 다시 그리기
+    initStudentBonus();
+}
+
+// 역할군 필터 (STRIKER / SPECIAL)
+window.toggleRoleFilter = function(role, btn) {
+    // 재화 필터가 켜져있으면 역할군 필터는 동작 안 하게 막거나, 
+    // 혹은 같이 동작하게 할 수 있음. 여기선 '같이 동작'하도록 둠.
+    if (activeRoles.has(role)) {
+        activeRoles.delete(role);
+        btn.classList.remove('active');
+    } else {
+        activeRoles.add(role);
+        btn.classList.add('active');
+    }
+    initStudentBonus();
+}
+
 function initStudentBonus() {
     const grid = document.getElementById('student-grid');
     if (!grid) return;
     grid.innerHTML = '';
 
-    studentData.forEach((student, idx) => {
+    if (!studentData.length) {
+        grid.innerHTML = '<p style="color:#aaa; text-align:center; grid-column:1/-1;">데이터 로딩중</p>';
+        return;
+    }
+
+    // [핵심] 어떤 보너스 수치를 보여줄 것인가?
+    // 재화 필터가 켜져있으면 그 재화 기준, 아니면 현재 상점 탭 기준
+    const isFiltering = (activeBonusFilter !== -1);
+    const targetBonusIdx = isFiltering ? activeBonusFilter : currentTab;
+
+    // 1. 필터링 로직
+    const filtered = studentData.filter(student => {
+        // (1) 재화 필터가 켜져있다면? -> 해당 보너스가 0보다 큰 학생만 통과
+        if (isFiltering) {
+            const bonusVal = Array.isArray(student.bonus) ? (student.bonus[targetBonusIdx] || 0) : student.bonus;
+            return bonusVal > 0;
+        }
+        // (2) 꺼져있다면? -> 기존 역할군(Striker/Special) 필터 적용
+        return (!student.role || activeRoles.has(student.role));
+    });
+
+    if (filtered.length === 0) {
+        grid.innerHTML = '<p style="color:#999; font-size:0.8rem; grid-column:1/-1; text-align:center; padding:20px;">해당하는 학생이 없습니다.</p>';
+        return;
+    }
+
+    // 2. 카드 생성
+    filtered.forEach(student => {
+        const originalIdx = studentData.indexOf(student);
         const card = document.createElement('div');
         card.className = 'student-card';
-        card.onclick = () => toggleStudent(idx, card);
+        if (selectedStudents.has(originalIdx)) card.classList.add('selected');
+        
+        card.onclick = () => toggleStudent(originalIdx, card);
+
+        // 표시할 보너스 수치 가져오기
+        let displayBonus = 0;
+        if(Array.isArray(student.bonus)) {
+            displayBonus = student.bonus[targetBonusIdx] || 0;
+        } else {
+            displayBonus = student.bonus || 0;
+        }
 
         const imgSrc = student.img ? (IMG_PATH + student.img) : DEFAULT_IMG;
-
         card.innerHTML = `
             <div class="card-inner">
                 <img src="${imgSrc}" class="student-img" onerror="this.src='${DEFAULT_IMG}'">
                 <div class="check-badge">✔</div>
             </div>
-            <div class="bonus-tag-bar">+${student.bonus}%</div>
+            <div class="bonus-tag-bar">+${displayBonus}%</div>
         `;
         grid.appendChild(card);
     });
 }
 
-window.toggleStudent = function(idx, cardElement) {
+window.toggleStudent = function(idx, card) {
     if (selectedStudents.has(idx)) {
         selectedStudents.delete(idx);
-        cardElement.classList.remove('selected');
+        card.classList.remove('selected');
     } else {
         selectedStudents.add(idx);
-        cardElement.classList.add('selected');
+        card.classList.add('selected');
     }
     updateTotalBonus();
 }
 
 function updateTotalBonus() {
-    let total = 0;
+    let totals = [0, 0, 0];
+
     selectedStudents.forEach(idx => {
-        total += studentData[idx].bonus;
+        const s = studentData[idx];
+        if(s) {
+            if(Array.isArray(s.bonus)) {
+                totals[0] += (s.bonus[0] || 0);
+                totals[1] += (s.bonus[1] || 0);
+                totals[2] += (s.bonus[2] || 0);
+            } else {
+                totals[0] += s.bonus;
+                totals[1] += s.bonus;
+                totals[2] += s.bonus;
+            }
+        }
     });
 
-    document.getElementById('totalStudentBonusBadge').innerText = total + "%";
+    // 현황판 갱신
+    for(let i=0; i<3; i++) {
+        const valEl = document.getElementById(`bd-val-${i}`);
+        if(valEl) valEl.innerText = totals[i] + "%";
+    }
 
-    const bonusSelect = document.getElementById('bonusRate');
-    let exists = false;
-    for(let opt of bonusSelect.options) {
-        if(parseInt(opt.value) === total) {
-            bonusSelect.value = total;
-            exists = true;
-            break;
-        }
-    }
-    if(!exists) {
-        const opt = document.createElement('option');
-        opt.value = total;
-        opt.text = total + "% (편성)";
-        bonusSelect.add(opt);
-        bonusSelect.value = total;
-    }
+    // 메인 입력칸 갱신 (현재 탭 기준)
+    const mainInput = document.getElementById('bonusRate');
+    if(mainInput) mainInput.value = totals[currentTab];
+
     calculate();
 }
 
@@ -141,262 +228,110 @@ window.toggleStudentSelector = function() {
 }
 
 // ============================================================
-// 4. 기존 UI 생성 및 로직
+// 4. 탭 및 상점 로직
 // ============================================================
 function initTabs() {
-    const tabContainer = document.querySelector('.shop-tabs');
-    if (!tabContainer) return;
-    tabContainer.innerHTML = ''; 
-    for (let i = 0; i < 3; i++) {
-        const dropIdx = tabMap[i]; 
-        const iconName = currencyIcons[dropIdx] || DEFAULT_IMG;
-        const iconPath = IMG_PATH + iconName;
+    const con = document.querySelector('.shop-tabs');
+    con.innerHTML = '';
+    for(let i=0; i<3; i++) {
+        const icon = (currencyIcons[tabMap[i]]) ? IMG_PATH+currencyIcons[tabMap[i]] : DEFAULT_IMG;
         const div = document.createElement('div');
-        div.className = `tab-btn ${i === currentTab ? 'active' : ''}`;
+        div.className = `tab-btn ${i===currentTab?'active':''}`;
         div.onclick = () => switchTab(i);
-        div.innerHTML = `<img src="${iconPath}" class="tab-icon" onerror="this.style.display='none'"> 상점 ${i + 1}`;
-        tabContainer.appendChild(div);
+        div.innerHTML = `<img src="${icon}" class="tab-icon"> 상점 ${i+1}`;
+        con.appendChild(div);
     }
 }
 
-function initShop() {
-    const container = document.getElementById('shop-container');
-    if (!container) return;
-    container.innerHTML = '';
-    for (let sectionIdx = 0; sectionIdx < 3; sectionIdx++) {
-        const sectionDiv = document.createElement('div');
-        sectionDiv.className = `shop-section ${sectionIdx === 0 ? 'active' : ''}`;
-        sectionDiv.id = `section-${sectionIdx}`;
-        const customItems = shopConfig[sectionIdx] || [];
-
-        if (customItems.length === 0) {
-            sectionDiv.innerHTML = '<p style="text-align:center; width:100%; color:#999; padding:20px;">아이템이 없습니다.</p>';
-        } else {
-            customItems.forEach((data) => {
-                const itemPrice = data.price || 0;
-                const itemQty = data.qty !== undefined ? data.qty : 0;
-                const itemName = data.name || "아이템";
-                const fullPath = data.img ? (IMG_PATH + data.img) : DEFAULT_IMG;
-                const isUnlimited = (itemQty === -1);
-                const isDisabled = (itemQty === 0);
-                const badgeText = isUnlimited ? "구매제한: ∞" : `구매제한: ${itemQty}회`;
-                const badgeClass = isUnlimited ? "limit-badge unlimited" : "limit-badge";
-                const maxVal = isUnlimited ? 9999 : itemQty;
-
-                const card = document.createElement('div');
-                card.className = `item-card ${isDisabled ? 'disabled' : ''}`;
-                card.innerHTML = `
-                    <input type="checkbox" class="item-checkbox" ${isDisabled ? 'disabled' : ''} onchange="updateTotal(${sectionIdx})">
-                    <div class="card-top">
-                        <span class="item-name" title="${itemName}">${itemName}</span>
-                        <div class="img-box"><img src="${fullPath}" onerror="this.src='${DEFAULT_IMG}'"></div>
-                        <span class="${badgeClass}">${badgeText}</span>
-                        <div class="price-tag"><span>Cost</span> <strong>${itemPrice}</strong></div>
-                    </div>
-                    <input type="hidden" class="cost-input" value="${itemPrice}">
-                    <div class="control-row">
-                        <input type="range" class="range-input" min="0" max="${maxVal}" value="0" ${isDisabled ? 'disabled' : ''} oninput="syncValues(this, 'range', ${sectionIdx})">
-                        <input type="number" class="qty-input-sm" min="0" max="${maxVal}" value="0" ${isDisabled ? 'disabled' : ''} oninput="syncValues(this, 'number', ${sectionIdx})">
-                    </div>
-                `;
-                card.addEventListener('click', function(e) {
-                    if (e.target.tagName === 'INPUT') return;
-                    const checkbox = this.querySelector('.item-checkbox');
-                    if (checkbox && !checkbox.disabled) {
-                        checkbox.checked = !checkbox.checked;
-                        updateTotal(sectionIdx);
-                    }
-                });
-                sectionDiv.appendChild(card);
-            });
-        }
-        container.appendChild(sectionDiv);
+function initShop() { 
+    const c = document.getElementById('shop-container'); c.innerHTML = '';
+    for(let i=0; i<3; i++) {
+        const sec = document.createElement('div'); sec.className = `shop-section ${i===0?'active':''}`; sec.id = `section-${i}`;
+        (shopConfig[i]||[]).forEach(d => {
+            const card = document.createElement('div'); card.className = `item-card ${d.qty===0?'disabled':''}`;
+            const img = d.img ? IMG_PATH+d.img : DEFAULT_IMG;
+            const badge = d.qty===-1 ? 'limit-badge unlimited' : 'limit-badge';
+            const bText = d.qty===-1 ? '구매제한: ∞' : `구매제한: ${d.qty}회`;
+            const max = d.qty===-1 ? 99 : d.qty;
+            card.innerHTML = `
+                <input type="checkbox" class="item-checkbox" onchange="updateTotal(${i})">
+                <div class="card-top"><span class="item-name">${d.name}</span>
+                <div class="img-box"><img src="${img}"></div><span class="${badge}">${bText}</span>
+                <div class="price-tag">Cost <strong>${d.price}</strong></div></div>
+                <input type="hidden" class="cost-input" value="${d.price}">
+                <div class="control-row"><input type="range" class="range-input" min="0" max="${max}" value="0" oninput="syncValues(this,'range',${i})">
+                <input type="number" class="qty-input-sm" min="0" max="${max}" value="0" oninput="syncValues(this,'num',${i})"></div>
+            `;
+            card.addEventListener('click', (e)=>{ if(e.target.tagName!=='INPUT'){
+                const chk = card.querySelector('.item-checkbox'); 
+                if(!chk.disabled){ chk.checked=!chk.checked; updateTotal(i); }
+            }});
+            sec.appendChild(card);
+        });
+        c.appendChild(sec);
     }
-    if(document.getElementById('targetAmount')) document.getElementById('targetAmount').value = 0;
-    if(document.getElementById('currentAmount')) document.getElementById('currentAmount').value = 0;
-}
-
-function initBonus() {
-    const select = document.getElementById('bonusRate');
-    if (!select) return;
-    select.innerHTML = '';
-    for (let i = 0; i <= 150; i += 5) {
-        const option = document.createElement('option');
-        option.value = i;
-        option.text = i + "%";
-        select.appendChild(option);
-    }
-    select.value = 0;
 }
 
 function initStageFilters() {
-    const container = document.getElementById('stage-filter-container');
-    if (!container) return;
-    container.innerHTML = '';
-    stageConfig.forEach((stage, idx) => {
-        const checkId = `filter-chk-${idx}`;
-        const div = document.createElement('div');
-        div.innerHTML = `
-            <input type="checkbox" id="${checkId}" class="filter-check-input" value="${idx}" checked onchange="calculate()">
-            <label for="${checkId}" class="filter-label">${stage.name}</label>
-        `;
-        container.appendChild(div);
+    const c = document.getElementById('stage-filter-container'); c.innerHTML = '';
+    stageConfig.forEach((s, i) => {
+        const d = document.createElement('div');
+        d.innerHTML = `<input type="checkbox" id="f-${i}" class="filter-check-input" value="${i}" checked onchange="calculate()">
+        <label for="f-${i}" class="filter-label">${s.name}</label>`;
+        c.appendChild(d);
     });
 }
-
-window.toggleAllStages = function(forceState) {
-    const inputs = document.querySelectorAll('.filter-check-input');
-    inputs.forEach(input => { input.checked = forceState; });
+window.toggleAllStages = (state) => { document.querySelectorAll('.filter-check-input').forEach(el => el.checked = state); calculate(); }
+window.syncValues = (el, type, sIdx) => {
+    const p = el.closest('.control-row'); const r = p.querySelector('.range-input'); const n = p.querySelector('.qty-input-sm');
+    const card = el.closest('.item-card'); const chk = card.querySelector('.item-checkbox');
+    let v = parseInt(el.value)||0; if(v > parseInt(r.max)) v = parseInt(r.max);
+    r.value = v; n.value = v;
+    if(v>0 && !chk.disabled) { chk.checked = true; card.classList.add('selected'); }
+    else if(v===0) { chk.checked = false; card.classList.remove('selected'); }
+    updateTotal(sIdx);
+}
+window.updateTotal = (sIdx) => {
+    const sec = document.getElementById(`section-${sIdx}`); let sum = 0;
+    sec.querySelectorAll('.item-card').forEach(c => {
+        if(c.querySelector('.item-checkbox').checked) {
+            sum += (parseInt(c.querySelector('.cost-input').value)||0) * (parseInt(c.querySelector('.qty-input-sm').value)||0);
+            c.classList.add('selected');
+        } else c.classList.remove('selected');
+    });
+    tabTotals[sIdx] = sum;
+    if(currentTab===sIdx) document.getElementById('targetAmount').value = sum;
     calculate();
 }
-
-function initDropTable() {
-    const container = document.getElementById('drop-table-list');
-    if (!container) return;
-    container.innerHTML = '';
-    const bonusPercent = parseInt(document.getElementById('bonusRate').value) || 0;
-
-    stageConfig.forEach((stage) => {
-        const row = document.createElement('div');
-        row.className = 'stage-row';
-        let allDropsHtml = ''; 
-        if (stage.drops) {
-            stage.drops.forEach((baseAmount, idx) => {
-                if (baseAmount && baseAmount > 0) {
-                    const iconName = currencyIcons[idx] || DEFAULT_IMG;
-                    const iconPath = IMG_PATH + iconName;
-                    allDropsHtml += `
-                        <div class="drop-badge" title="기본 드랍: ${baseAmount}개">
-                            <img src="${iconPath}" onerror="this.style.display='none'">
-                            <span>x${baseAmount}</span>
-                        </div>
-                    `;
-                    if (bonusPercent > 0) {
-                        const bonusAmount = Math.ceil(baseAmount * (bonusPercent / 100));
-                        if (bonusAmount > 0) {
-                            allDropsHtml += `
-                                <div class="drop-badge bonus-drop" title="보너스 추가: +${bonusAmount}">
-                                    <span class="table-bonus-badge">Bonus</span>
-                                    <img src="${iconPath}" onerror="this.style.display='none'">
-                                    <span>+${bonusAmount}</span>
-                                </div>
-                            `;
-                        }
-                    }
-                }
-            });
-        }
-        row.innerHTML = `
-            <div class="stage-info"><div class="stage-title">${stage.name}</div><div class="stage-ap-badge">${stage.ap} AP</div></div>
-            <div class="base-area"></div>
-            <div class="bonus-area">${allDropsHtml || '<span style="font-size:0.8rem; color:#ccc;">-</span>'}</div>
-        `;
-        container.appendChild(row);
-    });
-}
-
-window.syncValues = function(element, type, sectionIdx) {
-    const parent = element.closest('.control-row');
-    const rangeInput = parent.querySelector('.range-input');
-    const numInput = parent.querySelector('.qty-input-sm');
-    const card = element.closest('.item-card');
-    const checkbox = card.querySelector('.item-checkbox');
-    let val = parseInt(element.value) || 0;
-    const maxVal = parseInt(rangeInput.max);
-    if (val > maxVal) val = maxVal;
-    if (val < 0) val = 0;
-    rangeInput.value = val;
-    numInput.value = val;
-    if (val > 0 && !checkbox.disabled) {
-        checkbox.checked = true;
-        card.classList.add('selected');
-    } else if (val === 0) {
-        checkbox.checked = false;
-        card.classList.remove('selected');
-    }
-    updateTotal(sectionIdx);
-}
-
 window.switchTab = function(idx) {
     currentTab = idx;
-    document.querySelectorAll('.tab-btn').forEach((btn, i) => btn.classList.toggle('active', i === idx));
-    document.querySelectorAll('.shop-section').forEach((sec, i) => sec.classList.toggle('active', i === idx));
+    document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+    document.querySelectorAll('.shop-section').forEach((s, i) => s.classList.toggle('active', i === idx));
     document.getElementById('targetAmount').value = tabTotals[idx];
-    document.getElementById('currentAmount').value = globalCurrentAmounts[idx]; 
-    calculate(); 
+    document.getElementById('currentAmount').value = globalCurrentAmounts[idx];
+    
+    // 탭 변경 시 필터 초기화 (사용자 편의상)
+    activeBonusFilter = -1;
+    for(let i=0; i<3; i++) document.getElementById(`bd-item-${i}`).classList.remove('active');
+    
+    initStudentBonus(); 
+    updateTotalBonus();
 }
-
-window.updateCurrent = function(val) {
-    const amount = parseInt(val) || 0;
-    globalCurrentAmounts[currentTab] = amount;
-    calculate();
+window.manualTarget = (v) => { tabTotals[currentTab] = parseInt(v)||0; calculate(); }
+window.updateCurrent = (v) => { globalCurrentAmounts[currentTab] = parseInt(v)||0; calculate(); }
+window.toggleApWidget = () => {
+    const b = document.getElementById('apIconBtn'); const p = document.getElementById('apPopup');
+    if(p.classList.contains('hidden')) { p.classList.remove('hidden'); b.style.display='none'; }
+    else { p.classList.add('hidden'); b.style.display='flex'; }
 }
-window.manualTarget = function(val) {
-    const amount = parseInt(val) || 0;
-    tabTotals[currentTab] = amount;
-    calculate();
-}
-
-window.updateTotal = function(sectionIdx) {
-    const section = document.getElementById(`section-${sectionIdx}`);
-    const cards = section.querySelectorAll('.item-card');
-    let sum = 0;
-    cards.forEach(card => {
-        const checkbox = card.querySelector('.item-checkbox');
-        if (checkbox.checked) {
-            card.classList.add('selected');
-            const cost = parseInt(card.querySelector('.cost-input').value) || 0;
-            const qty = parseInt(card.querySelector('.qty-input-sm').value) || 0;
-            sum += (cost * qty);
-        } else {
-            card.classList.remove('selected');
-        }
-    });
-    tabTotals[sectionIdx] = sum;
-    if (currentTab === sectionIdx) {
-        document.getElementById('targetAmount').value = sum;
-    }
-    calculate(); 
-}
-
-window.adjustAp = function(delta) {
-    const input = document.getElementById('curAp');
-    let val = parseInt(input.value) || 0;
-    val += delta;
-    if (val < 0) val = 0;
-    if (val > 240) val = 240;
-    input.value = val;
-    calcAp();
-}
-
-window.calcAp = function() {
-    const curApInput = document.getElementById('curAp');
-    const resultEl = document.getElementById('apResult');
-    const cur = parseInt(curApInput.value);
-    const max = 240;
-    if (isNaN(cur)) { resultEl.innerHTML = "현재 AP를 입력하세요"; return; }
-    if (cur >= max) { resultEl.innerHTML = "<span style='color:#128CFF; font-weight:bold;'>이미 꽉 찼습니다!</span>"; return; }
-    const needed = max - cur;
-    const totalMinutes = needed * 6;
-    const hours = Math.floor(totalMinutes / 60);
-    const mins = totalMinutes % 60;
-    const now = new Date();
-    const doneTime = new Date(now.getTime() + totalMinutes * 60000);
-    const doneHour = doneTime.getHours().toString().padStart(2, '0');
-    const doneMin = doneTime.getMinutes().toString().padStart(2, '0');
-    resultEl.innerHTML = `<div style="margin-bottom:4px;"><strong>${hours}시간 ${mins}분</strong> 후</div><div style="color:#128CFF; font-weight:900; font-size:1.1rem;">${doneHour}:${doneMin} 완료</div>`;
-}
-
-window.toggleApWidget = function() {
-    const body = document.getElementById('apWidgetBody');
-    const icon = document.getElementById('apToggleIcon');
-    if (body.classList.contains('hidden')) {
-        body.classList.remove('hidden');
-        icon.innerText = "▼";
-    } else {
-        body.classList.add('hidden');
-        icon.innerText = "▲";
-    }
+window.adjustAp = (d) => { const i = document.getElementById('curAp'); let v = (parseInt(i.value)||0)+d; if(v<0)v=0; if(v>240)v=240; i.value=v; calcAp(); }
+window.calcAp = () => {
+    const c = parseInt(document.getElementById('curAp').value); const r = document.getElementById('apResult');
+    if(isNaN(c)) { r.innerText="AP 입력"; return; }
+    if(c>=240) { r.innerText="Full!"; return; }
+    const m = (240-c)*6; const h = Math.floor(m/60); const mn = m%60;
+    const d = new Date(new Date().getTime()+m*60000);
+    r.innerHTML = `<strong>${h}시간 ${mn}분</strong><br><span style='color:#128CFF'>${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')} 완료</span>`;
 }
 
 // ============================================================
@@ -405,176 +340,195 @@ window.toggleApWidget = function() {
 window.calculate = function() {
     const needs = [0, 0, 0];
     for(let i=0; i<3; i++) {
-        let n = tabTotals[i] - globalCurrentAmounts[i];
-        if (n < 0) n = 0;
-        needs[i] = n;
+        needs[i] = Math.max(0, tabTotals[i] - globalCurrentAmounts[i]);
     }
 
-    if (needs[0] === 0 && needs[1] === 0 && needs[2] === 0) {
+    if (needs.every(n => n === 0)) {
         displayResult(null, 0, 0, [], 0, true);
         return;
     }
 
-    const bonusPercent = parseInt(document.getElementById('bonusRate').value) || 0;
+    const bonusVal = parseInt(document.getElementById('bonusRate').value) || 0;
     let bestStage = null;
-    let maxTotalEfficiency = -1; 
-    let bestGainInfo = [];
+    let maxEff = -1; 
+    let bestGains = [];
 
     stageConfig.forEach((stage, idx) => {
-        const filterEl = document.querySelector(`.filter-check-input[value="${idx}"]`);
-        if (filterEl && !filterEl.checked) return;
+        const chk = document.querySelector(`.filter-check-input[value="${idx}"]`);
+        if (chk && !chk.checked) return;
 
-        let totalEffectiveGain = 0; 
-        let currentGains = [];
+        let totalGain = 0;
+        let currentStageGains = [];
 
         if(stage.drops) {
-            for(let dropIdx=0; dropIdx < stage.drops.length; dropIdx++) {
-                const baseDrop = stage.drops[dropIdx];
-                let totalGain = 0;
-                if (baseDrop && baseDrop > 0) {
-                    const bonusAmount = Math.ceil(baseDrop * (bonusPercent / 100));
-                    totalGain = baseDrop + bonusAmount;
-                    const relatedTabIdx = tabMap.indexOf(dropIdx);
-                    if (relatedTabIdx !== -1 && needs[relatedTabIdx] > 0) {
-                        totalEffectiveGain += totalGain;
+            stage.drops.forEach((base, dIdx) => {
+                let gain = 0;
+                if (base > 0) {
+                    const bonusAmt = Math.ceil(base * (bonusVal / 100));
+                    gain = base + bonusAmt;
+                    
+                    const relatedTab = tabMap.indexOf(dIdx);
+                    if (relatedTab !== -1 && needs[relatedTab] > 0) {
+                        totalGain += gain;
                     }
                 }
-                currentGains[dropIdx] = totalGain;
-            }
+                currentStageGains[dIdx] = gain;
+            });
         }
-        const efficiency = totalEffectiveGain / stage.ap;
-        if (efficiency > maxTotalEfficiency) {
-            maxTotalEfficiency = efficiency;
+
+        const eff = totalGain / stage.ap;
+        if (eff > maxEff) {
+            maxEff = eff;
             bestStage = stage;
-            bestGainInfo = currentGains;
+            bestGains = currentStageGains;
         }
     });
 
-    if (!bestStage || maxTotalEfficiency <= 0) {
+    if (!bestStage || maxEff <= 0) {
         displayResult(null);
         return;
     }
 
-    let maxRunsNeeded = 0;
-    for(let tabIdx=0; tabIdx<3; tabIdx++) {
-        const dropIdx = tabMap[tabIdx]; 
-        const gain = bestGainInfo[dropIdx]; 
-        const need = needs[tabIdx];         
+    let maxRuns = 0;
+    for(let i=0; i<3; i++) {
+        const dropIdx = tabMap[i];
+        const gain = bestGains[dropIdx] || 0;
+        const need = needs[i];
         if (need > 0 && gain > 0) {
             const runs = Math.ceil(need / gain);
-            if (runs > maxRunsNeeded) maxRunsNeeded = runs;
+            if (runs > maxRuns) maxRuns = runs;
         }
     }
 
-    const totalAp = maxRunsNeeded * bestStage.ap;
-    const currentTabDropIdx = tabMap[currentTab];
-    const currentTabGain = bestGainInfo[currentTabDropIdx] || 0;
-    const currentTabNeed = needs[currentTab];
-    const totalFarmed = currentTabGain * maxRunsNeeded;
-    const surplus = (totalFarmed - currentTabNeed);
+    const totalAp = maxRuns * bestStage.ap;
+    const curDropIdx = tabMap[currentTab];
+    const curGain = bestGains[curDropIdx] || 0;
+    const farmed = curGain * maxRuns;
+    const surplus = farmed - needs[currentTab];
 
-    displayResult(bestStage, maxRunsNeeded, totalAp, bestGainInfo, surplus);
+    displayResult(bestStage, maxRuns, totalAp, bestGains, surplus);
     initDropTable();
 }
 
-function displayResult(stage, runs, ap, gains, surplus, isDone = false) {
-    const recNameEl = document.getElementById('recStageName');
-    const recInfoEl = document.getElementById('recStageInfo');
-    const resRunsEl = document.getElementById('result-runs');
-    const resApEl = document.getElementById('result-ap');
-    let surplusEl = document.getElementById('result-surplus');
-    const bonusPercent = parseInt(document.getElementById('bonusRate').value) || 0;
+function displayResult(stage, runs, ap, gains, surplus, isDone=false) {
+    const nameEl = document.getElementById('recStageName');
+    const infoEl = document.getElementById('recStageInfo');
+    const runsEl = document.getElementById('result-runs');
+    const apEl = document.getElementById('result-ap');
+    let surEl = document.getElementById('result-surplus');
+    const bonusVal = parseInt(document.getElementById('bonusRate').value) || 0;
 
-    if (!surplusEl) {
-        const resultBox = document.querySelector('.result-box');
-        if (resultBox) {
-            surplusEl = document.createElement('div');
-            surplusEl.id = 'result-surplus';
-            surplusEl.className = 'res-surplus-sm';
-            resultBox.appendChild(surplusEl);
-        }
+    if (!surEl) {
+        const box = document.querySelector('.result-box');
+        surEl = document.createElement('div');
+        surEl.id = 'result-surplus';
+        surEl.className = 'res-surplus-sm';
+        box.appendChild(surEl);
     }
 
-    if (isDone) {
-        recNameEl.innerText = "계산 대기중 ...";
-        recNameEl.style.color = "#128CFF";
-        recInfoEl.innerText = "설정된 아이템이 없습니다.";
-        resRunsEl.innerText = "0회";
-        resApEl.innerText = "-";
-        if(surplusEl) surplusEl.innerHTML = "";
-        return;
+    if(isDone) {
+        nameEl.innerText = "계산 대기중"; nameEl.style.color = "#128CFF";
+        infoEl.innerText = "-"; runsEl.innerText = "0회"; apEl.innerText = "-";
+        surEl.innerHTML = ""; return;
+    }
+    if(!stage) {
+        nameEl.innerText = "추천 불가"; nameEl.style.color = "#FF5555";
+        infoEl.innerText = "-"; runsEl.innerText = "-"; apEl.innerText = "-";
+        surEl.innerHTML = ""; return;
     }
 
-    if (!stage) {
-        recNameEl.innerText = "추천 불가";
-        recNameEl.style.color = "#FF5555";
-        recInfoEl.innerText = "조건에 맞는 스테이지가 없습니다.";
-        resRunsEl.innerText = "-";
-        resApEl.innerText = "-";
-        if(surplusEl) surplusEl.innerHTML = "";
-        return;
-    }
-
-    recNameEl.innerText = stage.name;
-    recNameEl.style.color = "#128CFF";
+    nameEl.innerText = stage.name;
     
-    let gainHtml = [];
-    if (stage.drops) {
-        for(let i=0; i < stage.drops.length; i++) {
-            const baseAmount = stage.drops[i];
-            if(baseAmount && baseAmount > 0) {
-                const iconName = currencyIcons[i] || DEFAULT_IMG;
-                const iconPath = IMG_PATH + iconName;
-                gainHtml.push(`
-                    <span class="gain-item" title="기본 드랍">
-                        <img src="${iconPath}" onerror="this.style.display='none'" class="mini-icon">
-                        <b>x${baseAmount}</b>
+    let html = [];
+    stage.drops.forEach((base, i) => {
+        if(base > 0) {
+            const icon = (currencyIcons[i]) ? IMG_PATH+currencyIcons[i] : DEFAULT_IMG;
+            const bonusAmt = Math.ceil(base * (bonusVal/100));
+            
+            html.push(`
+                <span class="gain-item">
+                    <img src="${icon}" class="mini-icon"> <b>x${base}</b>
+                </span>
+            `);
+            
+            if(bonusAmt > 0) {
+                html.push(`
+                    <span class="gain-item">
+                        <span class="bonus-badge">Bonus</span>
+                        <img src="${icon}" class="mini-icon"> <b>+${bonusAmt}</b>
                     </span>
                 `);
-                if (bonusPercent > 0) {
-                    const bonusAmount = Math.ceil(baseAmount * (bonusPercent / 100));
-                    if (bonusAmount > 0) {
-                        gainHtml.push(`
-                            <span class="gain-item" title="추가 보너스">
-                                <span class="bonus-badge">Bonus</span> 
-                                <img src="${iconPath}" onerror="this.style.display='none'" class="mini-icon">
-                                <b>x${bonusAmount}</b>
-                            </span>
-                        `);
-                    }
-                }
             }
         }
-    }
+    });
 
-    const apIconPath = IMG_PATH + "Texture2D/Currency_Icon_AP.png"; 
-
-    recInfoEl.innerHTML = `
-        <div style="margin-bottom:8px;">1회: ${gainHtml.join('')}</div>
-        <div style="display:flex; align-items:center; justify-content:center; color:rgba(138, 138, 138, 1); font-weight:900; font-size:1.3rem;">
-            <img src="${apIconPath}" alt="AP" style="width:28px; height:28px; object-fit:contain; margin-right:6px; vertical-align: middle;"> 
-            <span style="line-height: 1;">${stage.ap}</span>
+    infoEl.innerHTML = html.join('');
+    runsEl.innerText = runs + "회";
+    
+    apEl.innerHTML = `
+        <div style="display:flex; align-items:center; justify-content:center; gap:4px;">
+            <img src="${AP_ICON_PATH}" style="width:35px; height:35px; object-fit:contain;">
+            <span>${ap.toLocaleString()+"AP"}</span>
         </div>
     `;
 
-    resRunsEl.innerText = runs.toLocaleString() + "회";
-    resApEl.innerText = `(총 ${ap.toLocaleString()} AP)`;
-
-    if (surplus > 0 && surplusEl) {
-        const currentDropIdx = tabMap[currentTab];
-        const iconName = currencyIcons[currentDropIdx] || DEFAULT_IMG;
-        const currentIcon = IMG_PATH + iconName;
-        surplusEl.innerHTML = `
-            <div style="margin-top:10px;">
-                ⚠️ 탭 재화(<img src="${currentIcon}" class="mini-icon-white" style="width:14px;height:14px;">) 
-                <span style="color:#FFE500; font-weight:bold;">${surplus}개</span> 잉여
-            </div>
-        `;
-    } else if (surplusEl) {
-        surplusEl.innerHTML = "";
+    if(surplus > 0) {
+        const icon = (currencyIcons[tabMap[currentTab]]) ? IMG_PATH+currencyIcons[tabMap[currentTab]] : DEFAULT_IMG;
+        surEl.innerHTML = `⚠️ <img src="${icon}" class="mini-icon-white" style="width:35px;height:35px"> ${surplus}개 초과 획득 예상`;
+    } else {
+        surEl.innerHTML = "";
     }
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-    loadDataAndInit();
-});
+function initDropTable() {
+    const container = document.getElementById('drop-table-list');
+    if (!container) return;
+    container.innerHTML = '';
+    const bonusVal = parseInt(document.getElementById('bonusRate').value) || 0;
+    
+    stageConfig.forEach(stage => {
+        const row = document.createElement('div');
+        row.className = 'stage-row';
+        let html = '';
+        
+        if(stage.drops) {
+            stage.drops.forEach((base, i) => {
+                if(base > 0) {
+                    const icon = (currencyIcons[i]) ? IMG_PATH+currencyIcons[i] : DEFAULT_IMG;
+                    const bonusAmt = Math.ceil(base * (bonusVal/100));
+                    
+                    html += `
+                        <div class="drop-badge">
+                            <img src="${icon}">
+                            <span>x${base}</span>
+                        </div>
+                    `;
+
+                    if(bonusAmt > 0) {
+                        html += `
+                            <div class="drop-badge bonus-drop">
+                                <span class="table-bonus-badge">Bonus</span>
+                                <img src="${icon}">
+                                <span>+${bonusAmt}</span>
+                            </div>
+                        `;
+                    }
+                }
+            });
+        }
+        row.innerHTML = `
+            <div class="stage-info">
+                <div class="stage-title">${stage.name}</div>
+                <div class="stage-ap-badge">
+                    <img src="${AP_ICON_PATH}">
+                    ${stage.ap}
+                </div>
+            </div>
+            <div class="base-area"></div>
+            <div class="bonus-area">${html}</div>
+        `;
+        container.appendChild(row);
+    });
+}
+
+window.addEventListener('DOMContentLoaded', loadDataAndInit);

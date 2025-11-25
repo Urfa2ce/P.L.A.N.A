@@ -26,7 +26,7 @@ body {
 
 .container {
     width: 100%;
-    max-width: 900px;
+    max-width: 1100px;
     background: white;
     border-radius: 15px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.05);
@@ -371,17 +371,20 @@ select, .main-input { padding: 10px; border: 2px solid #ccc; border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 209, 255, 0.1);
 }
 
+/* [수정됨] 지역 정보 칸 너비 확대 (줄바꿈 방지) */
 .stage-info {
-    width: 110px;
-    flex-shrink: 0;
+    width: 280px;       /* 기존 110px -> 180px로 변경 */
+    flex-shrink: 0;     /* 너비 줄어들지 않게 고정 */
     border-right: 1px dashed #eee;
     display: flex;
     flex-direction: column;
     gap: 4px;
+    justify-content: center; /* 세로 중앙 정렬 추가 */
 }
 
 .stage-title { font-weight: bold; color: #333; font-size: 0.95rem; }
-.stage-ap-badge { font-size: 0.75rem; color: #888; background: #f5f5f5; padding: 2px 6px; border-radius: 4px; width: fit-content; }
+/* [수정됨] AP 배지 : 패딩을 줄여서 아이콘이 커져도 배지가 뚱뚱해지지 않게 함 */
+
 
 .base-area {
     flex: 1; display: flex; flex-wrap: wrap; gap: 5px; justify-content: center;
@@ -473,7 +476,12 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
     .container { padding: 15px; }
     .inputs-row, .result-row { flex-direction: column; gap: 15px; }
     .recommend-box, .result-box.compact-box { min-height: auto; padding: 20px; }
-    .shop-section.active { gap: 8px; }
+    
+    /* [Fix] 모바일 상점 2열 강제 */
+    .shop-section.active { 
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+    }
     .qty-input-sm { width: 35px; font-size: 0.8rem; }
     .img-box { width: 50px; height: 50px; }
     .stage-row { flex-direction: column; align-items: flex-start; gap: 10px; }
@@ -567,7 +575,7 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 .filter-label:hover { background: #e0e0e0; }
 
 /* ==========================================================================
-   10. [NEW] 학생 보너스 위젯 스타일 (블루 아카이브 UI)
+   10. [NEW] 학생 보너스 위젯 스타일 (블루 아카이브 UI) - 중복
    ========================================================================== */
 .bonus-widget-container {
     width: 100%;             /* 꽉 차게 설정 */
@@ -597,13 +605,51 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 }
 .student-selector-body.hidden { display: none; }
 
-.student-tabs { display: flex; gap: 4px; margin-bottom: 10px; }
-.s-tab {
-    font-weight: 900; font-size: 0.85rem; padding: 6px 16px; background: #fff;
-    color: #aaa; border-radius: 4px 4px 0 0; cursor: default; letter-spacing: 0.5px;
-}
-.s-tab.active { background: #D32F2F; color: white; }
+/* 탭 스타일 (수정됨: 색상 반전 로직 적용) */
+.student-tabs { display: flex; gap: 6px; margin-bottom: 12px; }
 
+.s-tab {
+    flex: 1; text-align: center; padding: 8px;
+    border-radius: 6px 6px 0 0;
+    font-weight: 900; font-size: 0.85rem;
+    cursor: pointer; letter-spacing: 0.5px;
+    transition: all 0.2s;
+    border: 1px solid #e0e0e0; border-bottom: none;
+    /* 기본 배경: 아주 옅은 회색 (거의 흰색) */
+    background: #fafafa;
+}
+
+/* --- STRIKER (빨강) --- */
+/* 1. 안 눌린 상태: 글자 빨강 / 배경 연회색 */
+.s-tab.striker {
+    color: #D32F2F;
+}
+/* 2. 눌린 상태: 글자 흰색 / 배경 빨강 */
+.s-tab.striker.active {
+    background: #D32F2F;
+    color: white;
+    border-color: #D32F2F;
+    box-shadow: 0 2px 6px rgba(211, 47, 47, 0.3);
+}
+
+/* --- SPECIAL (파랑) --- */
+/* 1. 안 눌린 상태: 글자 파랑 / 배경 연회색 */
+.s-tab.special {
+    color: #128CFF;
+}
+/* 2. 눌린 상태: 글자 흰색 / 배경 파랑 */
+.s-tab.special.active {
+    background: #128CFF;
+    color: white;
+    border-color: #128CFF;
+    box-shadow: 0 2px 6px rgba(18, 140, 255, 0.3);
+}
+
+/* 호버 효과 (안 눌린 탭에 마우스 올렸을 때) */
+.s-tab:hover:not(.active) {
+    background: #f0f0f0;
+    transform: translateY(-1px);
+}
 .student-grid {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px;
 }
@@ -636,7 +682,7 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 .student-card.selected .check-badge { display: flex; }
 
 /* ==========================================================================
-   11. [Mobile] 학생 보너스 그리드 4열 강제 적용 (추가됨)
+   11. [Mobile] 학생 보너스 그리드 4열 강제 적용 (추가됨) - 중복
    ========================================================================== */
 @media (max-width: 600px) {
     .student-grid {
@@ -655,3 +701,295 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
         font-size: 10px !important;
     }
 }
+
+/* ==========================================================================
+   [NEW] 추가된 패치 (보너스 현황판 + 아이콘 크기 고정)
+   ========================================================================== */
+
+/* 1. 보너스 현황판 대시보드 */
+.bonus-dashboard {
+    display: flex; align-items: center; justify-content: space-around;
+    background: white; border-radius: 8px; padding: 10px; margin-bottom: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.bd-item { display: flex; flex-direction: column; align-items: center; flex: 1; }
+.bd-val { font-weight: 900; font-size: 1.1rem; color: var(--ba-blue); margin-top: 4px;}
+.bd-line { width: 1px; height: 30px; background: #e0e0e0; }
+
+/* ==========================================================================
+   [Emergency Fix] 보너스 아이콘 크기 강제 고정 (최종)
+   ========================================================================== */
+
+/* 1. 아이콘을 감싸는 동그라미 박스 크기 */
+.bonus-dashboard .bd-item .bd-icon-box {
+    width: 85px !important;   /* 박스 지름 32px */
+    height: 85px !important;
+    min-width: 50px !important; /* 찌그러짐 방지 */
+    border-radius: 20%;
+    overflow: hidden;         /* 이미지가 박스 밖으로 넘치면 자름 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    border: 1px solid #eee;
+}
+
+/* 2. 내부 이미지 크기 (클래스 이름 없어도 적용되게 수정함) */
+.bonus-dashboard .bd-item .bd-icon-box img {
+    width: 100% !important;   /* 이미지 크기 20px */
+    height: 100% !important;
+    object-fit: contain !important; /* 비율 유지 */
+    max-width: 100%;
+    display: block;
+}
+/* ==========================================================================
+   6. AP 계산기 위젯 (iOS Style - 아이콘 토글형)
+   ========================================================================== */
+.ap-ios-wrapper {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+/* 1. 둥근 아이콘 버튼 (평소에 보이는 것) */
+.ap-ios-icon {
+    width: 55px;
+    height: 55px;
+    background: rgba(255, 255, 255, 0.85); /* 반투명 흰색 */
+    backdrop-filter: blur(12px);            /* 블러 효과 */
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 50%;                     /* 완전 원형 */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    transition: transform 0.2s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+
+.ap-ios-icon:hover {
+    transform: scale(1.1); /* 호버 시 확대 */
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.ap-ios-icon img {
+    width: 60%;
+    height: 60%;
+    object-fit: contain;
+}
+
+/* 2. 팝업창 (클릭하면 뜨는 것) */
+.ap-ios-popup {
+    margin-top: 15px;
+    width: 260px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    overflow: hidden;
+    animation: popupScale 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transform-origin: top left;
+}
+
+/* 숨김 클래스 */
+.ap-ios-popup.hidden {
+    display: none;
+}
+
+/* 헤더 */
+.ap-ios-header {
+    padding: 15px 20px;
+    font-weight: 900;
+    font-size: 1rem;
+    color: #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.close-btn-ios {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #999;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+/* 바디 */
+.ap-ios-body {
+    padding: 20px;
+    text-align: center;
+}
+
+/* 입력 컨트롤 */
+.ap-input-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.ap-input-row input {
+    width: 80px;
+    padding: 10px;
+    border: none;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.05);
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #333;
+    outline: none;
+}
+
+.ap-circle-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    color: var(--ba-blue);
+    font-weight: bold;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.ap-circle-btn:active { transform: scale(0.9); }
+
+.ap-status-text {
+    font-size: 0.8rem;
+    color: #888;
+    margin-bottom: 15px;
+}
+.max-ap-text { color: #333; font-weight: bold; }
+
+/* 결과 텍스트 */
+.ap-ios-result {
+    background: white;
+    padding: 12px;
+    border-radius: 16px;
+    font-size: 0.9rem;
+    color: #555;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+/* 팝업 애니메이션 */
+@keyframes popupScale {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* 모바일 위치 조정 */
+@media (max-width: 1100px) {
+    .ap-ios-wrapper {
+        top: 15px;
+        left: 15px;
+    }
+}
+/* [Fix] AP 배지 내부 아이콘 크기 확대 */
+.stage-ap-badge img {
+    width: 50px !important;  /* 기존 14px -> 22px로 확대 (원하는 대로 조절하세요) */
+    height: 22px !important;
+    object-fit: contain;     /* 비율 유지 */
+    vertical-align: middle;  /* 수직 정렬 보정 */
+    margin-bottom: 2px;      /* 숫자와 높이 맞추기 미세 조정 */
+}
+
+/* ==========================================================================
+   [Real Final Fix] AP 배지 아이콘 강제 확대 (여백 제거 효과)
+   ========================================================================== */
+
+/* 1. 배지 틀 (높이 고정, 넘치는 이미지 숨김 안 함) */
+.stage-ap-badge {
+    font-size: 0.85rem;
+    color: #444;
+    background: #f5f5f5;
+    
+    /* 높이와 패딩 설정 */
+    height: 24px; 
+    padding: 0 8px 0 4px; /* 왼쪽 패딩을 줄여서 아이콘을 벽에 붙임 */
+    
+    border-radius: 12px;
+    width: fit-content;
+    font-weight: 900;
+    
+    /* 내용물 중앙 정렬 */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px; /* 아이콘과 글자 사이 간격 좁힘 */
+}
+
+/* 2. 아이콘 이미지 (강제 확대) */
+.stage-ap-badge img {
+    width: 24px !important;  /* 박스 크기는 24px */
+    height: 24px !important;
+    object-fit: contain;
+    
+    /* ▼▼▼ 여기가 핵심! 이미지를 1.6배 뻥튀기해서 여백을 없앰 ▼▼▼ */
+    transform: scale(1.6) translateY(-1px); 
+    
+    /* 필요시 좌우 여백 미세 조정 */
+    margin-right: -2px; 
+}
+
+/* [수정됨] 3종 보너스 현황판 (클릭 가능하게 변경) */
+.bonus-dashboard {
+    display: flex; align-items: center; justify-content: space-around;
+    background: white; border-radius: 8px; padding: 10px; margin-bottom: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.bd-item { 
+    display: flex; flex-direction: column; align-items: center; flex: 1; 
+    cursor: pointer; /* 손가락 모양 커서 */
+    border-radius: 8px;
+    padding: 5px;
+    transition: all 0.2s;
+    border: 2px solid transparent; /* 선택 효과를 위한 테두리 공간 */
+}
+
+/* 마우스 올렸을 때 */
+.bd-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* [NEW] 선택된 상태 (파란 테두리) */
+.bd-item.active {
+    background-color: #F0F9FF;
+    border-color: var(--ba-blue);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(18, 140, 255, 0.15);
+}
+
+/* 아이콘 박스 */
+.bd-icon-box {
+    width: 32px !important; height: 32px !important;
+    background: #fff; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; margin-bottom: 4px;
+    border: 1px solid #eee;
+    overflow: hidden;
+}
+
+/* 아이콘 이미지 */
+.bd-icon { 
+    width: 20px !important; height: 20px !important; 
+    object-fit: contain; display: block;
+}
+
+.bd-val { font-weight: 900; font-size: 1.1rem; color: var(--ba-blue); margin-top: 2px; }
+.bd-line { width: 1px; height: 30px; background: #e0e0e0; }

@@ -6,7 +6,32 @@
       "Texture2D/Item_Icon_Event_Token_2_S55.png",
       "Texture2D/Item_Icon_Event_Token_3_S55.png"
     ],
-    "tabMap": [1, 2, 3]
+    "tabMap": [1, 2, 0],
+    "tabDisplayMap": [1, 2, 3]
+  },
+  "studentBonuses": {
+    "타카네": [25, 0, 25],
+    "야쿠모": [25, 25, 0],
+    "코하루": [15, 15, 0],
+    "우이": [15, 0, 15],
+    "우이(수영복)": [15, 15, 0],
+    "모미지": [15, 15, 0],
+    "미카": [10, 0, 15],
+    "미카(수영복)": [15, 0, 15],
+    "사쿠라코": [15, 0, 15],
+    "히후미": [15, 15, 0],
+    "아즈사": [15, 0, 15],
+    "히나타": [0, 15, 15],
+    "메루": [0, 15, 15],
+
+    "나기사": [15, 0, 15],
+    "시미코": [15, 15, 0],
+    "마시로": [15, 0, 15],
+    "마시로(수영복)": [15, 15, 0],
+    "나기사(수영복)": [15, 0, 15],
+    "히후미(수영복)": [15, 15, 0],
+    "마리": [0, 15, 15],
+    "하나코": [0, 15, 15]
     
   },
   "itemMap": {
@@ -17,18 +42,16 @@
   "shopConfig": [
     [
       { "name": "초급 활동 보고서","img": "Texture2D/Item_Icon_ExpItem_0.png", "price": 1, "qty":90},
-      { "name": "일반 활동 보고서","img": "Texture2D/Equipment_Icon_Exp_1.png", "price": 3, "qty":95},
-      { "name": "상급 활동 보고서","img": "Texture2D/Equipment_Icon_Exp_2.png" , "price": 12, "qty":30},
-      { "name": "최상급 활동 보고서","img": "Texture2D/Equipment_Icon_Exp_3.png" , "price": 60, "qty":12},
-
+      { "name": "일반 활동 보고서","img": "Texture2D/Item_Icon_ExpItem_1.png", "price": 3, "qty":95},
+      { "name": "상급 활동 보고서","img": "Texture2D/Item_Icon_ExpItem_2.png" , "price": 12, "qty":30},
+      { "name": "최상급 활동 보고서","img": "Texture2D/Item_Icon_ExpItem_3.png" , "price": 60, "qty":12},
       { "name": "일반 전술 교육 BD\n(붉은겨울)","img": "Texture2D/Item_Icon_Material_ExSkill_RedWinter_0.png" , "price": 10 , "qty":30},
       { "name": "기초 전술 교육 BD\n(붉은겨울)","img": "Texture2D/Item_Icon_Material_ExSkill_RedWinter_1.png" , "price": 30, "qty":18},
       { "name": "상급 전술 교육 BD\n(붉은겨울)","img": "Texture2D/Item_Icon_Material_ExSkill_RedWinter_2.png" , "price": 100, "qty":12},
       { "name": "최상급 전술 교육 BD\n(붉은겨울)","img": "Texture2D/Item_Icon_Material_ExSkill_RedWinter_3.png" , "price": 300, "qty":4},
-
       { "name": "볼프세크 철광석","img": "Texture2D/Item_Icon_Material_Wolfsegg_0.png", "price": 5, "qty":150},
       { "name": "볼프세크 철조각","img": "Texture2D/Item_Icon_Material_Wolfsegg_1.png", "price": 15, "qty":50},
-      { "name": "저순도 볼프세크 깅철","img": "Texture2D/Item_Icon_Material_Wolfsegg_2.png", "price": 50, "qty":30}, 
+      { "name": "저순도 볼프세크 강철","img": "Texture2D/Item_Icon_Material_Wolfsegg_2.png", "price": 50, "qty":30}, 
       { "name": "고순도 볼프세크 강철","img": "Texture2D/Item_Icon_Material_Wolfsegg_3.png", "price": 200, "qty":11},
       { "name": "총, 귀여움, 청춘","img": "Texture2D/Item_Icon_Favor_9.png", "price": 200, "qty":10},
       { "name": "고전 시집","img": "Texture2D/Item_Icon_Favor_23.png", "price": 200, "qty":10},
@@ -40,44 +63,41 @@
       { "name": "일반 강화석", "img": "Texture2D/Equipment_Icon_Exp_1.png", "price": 4, "qty": 95 },
       { "name": "상급 강화석", "img": "Texture2D/Equipment_Icon_Exp_2.png", "price": 15, "qty": 30 },
       { "name": "최상급 강화석", "img": "Texture2D/Equipment_Icon_Exp_3.png", "price": 60, "qty": 12 },
-
       { "name": "기초 기술 노트\n(붉은겨울)", "img": "Texture2D/Item_Icon_SkillBook_RedWinter_0.png", "price": 5, "qty": 50 },
       { "name": "일반 기술 노트\n(붉은겨울)", "img": "Texture2D/Item_Icon_SkillBook_RedWinter_1.png", "price": 15, "qty": 38 },
       { "name": "상급 기술 노트\n(붉은겨울)", "img": "Texture2D/Item_Icon_SkillBook_RedWinter_2.png", "price": 50, "qty": 25 },
       { "name": "최상급 기술 노트\n(붉은겨울)", "img": "Texture2D/Item_Icon_SkillBook_RedWinter_3.png", "price": 200, "qty": 15 },
-
       { "name": "파에스토스 원반 조각", "img": "Texture2D/Item_Icon_Material_Phaistos_0.png", "price": 5, "qty": 150 },
       { "name": "파손된 파에스토스 원반", "img": "Texture2D/Item_Icon_Material_Phaistos_1.png", "price": 15, "qty": 50 },
       { "name": "마모된 파에스토스 원반", "img": "Texture2D/Item_Icon_Material_Phaistos_2.png", "price": 50, "qty": 30 },
       { "name": "온전한 파에스토스 원반", "img": "Texture2D/Item_Icon_Material_Phaistos_3.png", "price": 200, "qty": 11 },
       { "name": "비싸보이는 금박 욕망의 항아리", "img": "Texture2D/Item_Icon_Favor_29.png", "price": 200, "qty": 10 },
-
       { "name": "금단의 연애", "img": "Texture2D/Item_Icon_Favor_3.png", "price": 200, "qty": 10 },
       { "name": "고풍스러운 달걀 공예품", "img": "Texture2D/Item_Icon_Favor_Lv2_3.png", "price": 300, "qty": 1 },
       { "name": "크레딧 포인트", "img": "Texture2D/Currency_Icon_Gold.png", "price": 5, "qty": -1 }
     ],
     [
-      { "name": "판매용 데스크", "img": "My_Event086_Salesdesk.png", "price": 20, "qty": 1 },
-      { "name": "엘리그마 x5", "img": "Item_Icon_SecretStone.png", "price": 20, "qty": 1 },
-      { "name": "비의서", "img": "Item_Icon_SkillBook_Ultimate.png", "price": 20, "qty": 1 },
-      { "name": "크레딧 포인트 1M", "img": "Currency_Icon_Gold.png", "price": 5, "qty": 5 },
-      { "name": "크레딧 포인트 500K", "img": "Currency_Icon_Gold.png", "price": 3, "qty": 10 },
-      { "name": "크레딧 포인트 150K", "img": "Currency_Icon_Gold.png", "price": 1, "qty": 25 },
-      { "name": "크레딧 포인트 55K", "img": "Currency_Icon_Gold.png", "price": 1, "qty": -1 }
+      { "name": "판매용 데스크", "img": "Texture2D/My_Event086_Salesdesk.png", "price": 20, "qty": 1 },
+      { "name": "엘리그마 x5", "img": "ui/Item_Icon_SecretStone.png", "price": 20, "qty": 1 },
+      { "name": "비의서", "img": "Texture2D/Item_Icon_SkillBook_Ultimate.png", "price": 20, "qty": 1 },
+      { "name": "크레딧 포인트 1M", "img": "ui/Currency_Icon_Gold.png", "price": 5, "qty": 5 },
+      { "name": "크레딧 포인트 500K", "img": "ui/Currency_Icon_Gold.png", "price": 3, "qty": 10 },
+      { "name": "크레딧 포인트 150K", "img": "ui/Currency_Icon_Gold.png", "price": 1, "qty": 25 },
+      { "name": "크레딧 포인트 55K", "img": "ui/Currency_Icon_Gold.png", "price": 1, "qty": -1 }
     ]
   ],
   "stageConfig": [
-    { "name": "01지", "ap": 10, "drops": [2, 8, 8, null] },
-    { "name": "02지", "ap": 10, "drops": [0, 8, 2, null] },
-    { "name": "03지", "ap": 10, "drops": [0, 12, 6, null] },
-    { "name": "04지", "ap": 10, "drops": [12, 3, 3, null] },
-    { "name": "05지", "ap": 15, "drops": [5, 11, 11, null] },
-    { "name": "06지", "ap": 15, "drops": [null, 16, 11, null] },
-    { "name": "07지", "ap": 15, "drops": [null, 11, 16, null] },
-    { "name": "08지", "ap": 15, "drops": [19, 4, 4, null] },
-    { "name": "09지", "ap": 20, "drops": [8, 14, 14, null] },
-    { "name": "10지", "ap": 20, "drops": [4, 32, 0, null] },
-    { "name": "11지", "ap": 20, "drops": [4, 0, 32, null]},
-    { "name": "12  시스터 후드 별관 출구", "ap": 20, "drops": [36, 0, 0, null] }
+    { "name": "01 본관 A-9동 입구", "ap": 10, "drops": [2, 8, 8, null] },
+    { "name": "02 본관 A-9동 출구", "ap": 10, "drops": [0, 8, 2, null] },
+    { "name": "03 제 1 경당 복도", "ap": 10, "drops": [0, 12, 6, null] },
+    { "name": "04 제 1 경당 교차랑", "ap": 10, "drops": [12, 3, 3, null] },
+    { "name": "05 9번 동관 입구", "ap": 15, "drops": [5, 11, 11, null] },
+    { "name": "06 9번 동관 출구", "ap": 15, "drops": [null, 16, 11, null] },
+    { "name": "07 제 2 부속성당 회랑", "ap": 15, "drops": [null, 11, 16, null] },
+    { "name": "08 제 2 부속성당 측랑", "ap": 15, "drops": [19, 4, 4, null] },
+    { "name": "09 점거 당한 31별관 입구", "ap": 20, "drops": [8, 14, 14, null] },
+    { "name": "10 점거 당한 31별관 출구", "ap": 20, "drops": [4, 32, 0, null] },
+    { "name": "11 시스터 후드 별관 입구 ", "ap": 20, "drops": [4, 0, 32, null]},
+    { "name": "12 시스터 후드 별관 출구", "ap": 20, "drops": [36, 0, 0, null] }
   ]
 }

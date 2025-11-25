@@ -1,0 +1,20 @@
+[
+  { "name": "미카", "img": "ch/mika.webp",  "role": "STRIKER" },
+  { "name": "수미카", "img": "ch/Mika_(Swimsuit).png", "role": "STRIKER" },
+  { "name": "코하루", "img": "Texture2D/Student_Portrait_Koharu.png", "role": "STRIKER" },
+  { "name": "아즈사", "img": "Texture2D/Student_Portrait_Azusa.png",  "role": "STRIKER" },
+  { "name": "모모이", "img": "Texture2D/Student_Portrait_Momoi.png",  "role": "STRIKER" },
+  { "name": "미도리", "img": "Texture2D/Student_Portrait_Midori.png",  "role": "STRIKER" },
+  { "name": "유즈", "img": "Texture2D/Student_Portrait_Yuzu.png",  "role": "SPECIAL" },
+  { "name": "아리스", "img": "Texture2D/Student_Portrait_Aris.png",  "role": "STRIKER" },
+  { "name": "타카네", "img": "ch/Takane.png",  "role": "STRIKER" },
+  { "name": "타카네", "img": "ch/Takane.png",  "role": "STRIKER" },
+  { "name": "수미카", "img": "ch/Mika_(Swimsuit).png", "role": "STRIKER" },
+  { "name": "코하루", "img": "Texture2D/Student_Portrait_Koharu.png", "role": "STRIKER" },
+  { "name": "아즈사", "img": "Texture2D/Student_Portrait_Azusa.png",  "role": "STRIKER" },
+  { "name": "모모이", "img": "Texture2D/Student_Portrait_Momoi.png",  "role": "STRIKER" },
+  { "name": "미도리", "img": "Texture2D/Student_Portrait_Midori.png",  "role": "STRIKER" },
+  { "name": "유즈", "img": "Texture2D/Student_Portrait_Yuzu.png",  "role": "SPECIAL" },
+  { "name": "아리스", "img": "Texture2D/Student_Portrait_Aris.png",  "role": "STRIKER" }
+  
+]

@@ -8,22 +8,25 @@
 </head>
 <body>
 
-<div class="ap-widget">
-    <div class="ap-header" onclick="toggleApWidget()" title="클릭해서 접기/펴기">
-        <span>☕ AP 계산기</span>
-        <span id="apToggleIcon" style="font-size:0.8rem;">▼</span>
+<div class="ap-ios-wrapper">
+    <div id="apIconBtn" class="ap-ios-icon" onclick="toggleApWidget()" title="AP 계산기 열기">
+        <img src="src/ui/Currency_Icon_AP.png" alt="AP" onerror="this.style.display='none'">
     </div>
-    
-    <div id="apWidgetBody" class="ap-body">
-        <div class="ap-input-row">
-            <button class="ap-btn" onclick="adjustAp(-1)">-</button>
-            <input type="number" id="curAp" placeholder="현재" oninput="calcAp()">
-            <button class="ap-btn" onclick="adjustAp(1)">+</button>
-            <span class="slash">/</span>
-            <span class="max-ap-text">240</span>
+    <div id="apPopup" class="ap-ios-popup hidden">
+        <div class="ap-ios-header">
+            <span>AP 만땅 계산기</span>
+            <button class="close-btn-ios" onclick="toggleApWidget()">✕</button>
         </div>
-        <div id="apResult" class="ap-result">
-            입력 대기 중...
+        <div class="ap-ios-body">
+            <div class="ap-input-row">
+                <button class="ap-circle-btn" onclick="adjustAp(-1)">-</button>
+                <input type="number" id="curAp" placeholder="현재" oninput="calcAp()">
+                <button class="ap-circle-btn" onclick="adjustAp(1)">+</button>
+            </div>
+            <div class="ap-status-text">
+                <span class="slash">Max</span> <span class="max-ap-text">240</span>
+            </div>
+            <div id="apResult" class="ap-ios-result">입력 대기 중...</div>
         </div>
     </div>
 </div>
@@ -35,15 +38,37 @@
         <div class="bonus-toggle-header" onclick="toggleStudentSelector()">
             <div class="b-title">
                 <span>🎓 학생 보너스 편성</span>
-                <span id="totalStudentBonusBadge" class="total-badge">0%</span>
             </div>
             <span id="studentToggleIcon">▼</span>
         </div>
 
         <div id="studentSelectorBox" class="student-selector-body hidden">
+            
+            <div class="bonus-dashboard">
+                <div id="bd-item-0" class="bd-item" onclick="toggleBonusFilter(0)">
+                    <div class="bd-icon-box">
+                        <img id="bd-icon-0" src="" class="bd-icon" onerror="this.style.display='none'">
+                    </div>
+                    <span id="bd-val-0" class="bd-val">0%</span>
+                </div>
+                <div class="bd-line"></div>
+                <div id="bd-item-1" class="bd-item" onclick="toggleBonusFilter(1)">
+                    <div class="bd-icon-box">
+                        <img id="bd-icon-1" src="" class="bd-icon" onerror="this.style.display='none'">
+                    </div>
+                    <span id="bd-val-1" class="bd-val">0%</span>
+                </div>
+                <div class="bd-line"></div>
+                <div id="bd-item-2" class="bd-item" onclick="toggleBonusFilter(2)">
+                    <div class="bd-icon-box">
+                        <img id="bd-icon-2" src="" class="bd-icon" onerror="this.style.display='none'">
+                    </div>
+                    <span id="bd-val-2" class="bd-val">0%</span>
+                </div>
+            </div>
             <div class="student-tabs">
-                <div class="s-tab active">STRIKER</div>
-                <div class="s-tab">SPECIAL</div>
+                <div class="s-tab striker active" onclick="toggleRoleFilter('STRIKER', this)">STRIKER</div>
+                <div class="s-tab special active" onclick="toggleRoleFilter('SPECIAL', this)">SPECIAL</div>
             </div>
             <div id="student-grid" class="student-grid"></div>
         </div>
@@ -51,16 +76,13 @@
 
     <div class="shop-tabs">
         <div class="tab-btn active" onclick="switchTab(0)">
-            <img src="" class="tab-icon" alt="A" onerror="this.style.display='none'"> 
-            상점 1
+            <img src="" class="tab-icon" alt="A" onerror="this.style.display='none'"> 상점 1
         </div>
         <div class="tab-btn" onclick="switchTab(1)">
-            <img src="" class="tab-icon" alt="B" onerror="this.style.display='none'"> 
-            상점 2
+            <img src="" class="tab-icon" alt="B" onerror="this.style.display='none'"> 상점 2
         </div>
         <div class="tab-btn" onclick="switchTab(2)">
-            <img src="" class="tab-icon" alt="C" onerror="this.style.display='none'"> 
-            상점 3
+            <img src="" class="tab-icon" alt="C" onerror="this.style.display='none'"> 상점 3
         </div>
     </div>
 
@@ -78,22 +100,20 @@
             </div>
             <div class="col">
                 <label>보너스 합계 (%)</label>
-                <select id="bonusRate" class="main-input" onchange="calculate()">
-                    </select>
+                <input type="number" id="bonusRate" class="main-input" value="0" min="0" placeholder="0" oninput="calculate()">
             </div>
         </div>
 
         <div class="row result-row">
             <div class="col">
-                <label>추천 스테이지 (BEST)</label>
+                <label>추천 스테이지</label>
                 <div class="recommend-box">
                     <div id="recStageName" class="rec-name">계산 중...</div>
                     <div id="recStageInfo" class="rec-info">-</div>
                 </div>
             </div>
-            
             <div class="col">
-                <label>최종 결과</label>
+                <label>계산 결과</label>
                 <div class="result-box compact-box">
                     <div class="res-mini-title">필요 소탕</div>
                     <div id="result-runs" class="res-value-sm">0회</div>
