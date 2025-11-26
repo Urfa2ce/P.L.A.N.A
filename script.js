@@ -378,148 +378,234 @@ window.calcAp = () => {
 // ============================================================
 // 5. 핵심 효율 계산
 // ============================================================
+// ============================================================
+// 5. 핵심 효율 계산 (다중 스테이지 최적화 버전)
+// ============================================================
 window.calculate = function() {
-    const needs = [0, 0, 0];
+    // 1. 필요한 재화량 계산 (Needs)
+    let needs = [0, 0, 0];
+    let totalNeedCount = 0;
     for(let i=0; i<3; i++) {
         needs[i] = Math.max(0, tabTotals[i] - globalCurrentAmounts[i]);
+        totalNeedCount += needs[i];
     }
 
-    if (needs.every(n => n === 0)) {
-        displayResult(null, 0, 0, [], 0, true);
+    // 필요량이 없으면 종료
+    if (totalNeedCount === 0) {
+        displayResult([], 0, 0);
         return;
     }
 
+    // 2. 보너스 비율 가져오기
     const bonusInput = document.getElementById('bonusRate');
     const bonusVal = parseInt(bonusInput ? bonusInput.value : 0) || 0;
-    let bestStage = null;
-    let maxEff = -1; 
-    let bestGains = [];
 
-    stageConfig.forEach((stage, idx) => {
-        const chk = document.querySelector(`.filter-check-input[value="${idx}"]`);
-        if (chk && !chk.checked) return;
+    // 3. 각 스테이지별 "실질 드랍량" 미리 계산
+    // (보너스 적용된 드랍량)
+    let stageOptions = [];
+    stageConfig.forEach((stage, sIdx) => {
+        const chk = document.querySelector(`.filter-check-input[value="${sIdx}"]`);
+        if (chk && !chk.checked) return; // 필터 꺼진 곳 제외
 
-        let totalGain = 0;
-        let currentStageGains = [];
-
+        let effectiveDrops = [0, 0, 0];
         if(stage.drops) {
             stage.drops.forEach((base, dIdx) => {
-                let gain = 0;
-                if (base > 0) {
+                if(base > 0) {
                     const bonusAmt = Math.ceil(base * (bonusVal / 100));
-                    gain = base + bonusAmt;
-                    
-                    const relatedTab = tabMap.indexOf(dIdx);
-                    if (relatedTab !== -1 && needs[relatedTab] > 0) {
-                        totalGain += gain;
+                    // 탭 매핑이 되어 있는 재화인지 확인
+                    const targetTabIdx = tabMap.indexOf(dIdx);
+                    if(targetTabIdx !== -1) {
+                         effectiveDrops[targetTabIdx] = base + bonusAmt;
                     }
                 }
-                currentStageGains[dIdx] = gain;
             });
         }
-
-        const eff = totalGain / stage.ap;
-        if (eff > maxEff) {
-            maxEff = eff;
-            bestStage = stage;
-            bestGains = currentStageGains;
-        }
+        
+        stageOptions.push({
+            id: sIdx,
+            data: stage,
+            drops: effectiveDrops, // [재화0드랍, 재화1드랍, 재화2드랍]
+            ap: stage.ap,
+            runCount: 0
+        });
     });
 
-    if (!bestStage || maxEff <= 0) {
-        displayResult(null);
+    if (stageOptions.length === 0) {
+        displayResult(null); // 추천 불가능
         return;
     }
 
-    let maxRuns = 0;
-    for(let i=0; i<3; i++) {
-        const dropIdx = tabMap[i];
-        const gain = bestGains[dropIdx] || 0;
-        const need = needs[i];
-        if (need > 0 && gain > 0) {
-            const runs = Math.ceil(need / gain);
-            if (runs > maxRuns) maxRuns = runs;
-        }
-    }
-
-    const totalAp = maxRuns * bestStage.ap;
-    const curDropIdx = tabMap[currentTab];
-    const curGain = bestGains[curDropIdx] || 0;
-    const farmed = curGain * maxRuns;
-    const surplus = farmed - needs[currentTab];
-
-    displayResult(bestStage, maxRuns, totalAp, bestGains, surplus);
-    initDropTable();
-}
-
-function displayResult(stage, runs, ap, gains, surplus, isDone=false) {
-    const nameEl = document.getElementById('recStageName');
-    const infoEl = document.getElementById('recStageInfo');
-    const runsEl = document.getElementById('result-runs');
-    const apEl = document.getElementById('result-ap');
-    let surEl = document.getElementById('result-surplus');
-    const bonusVal = parseInt(document.getElementById('bonusRate').value) || 0;
-
-    if (!surEl) {
-        const box = document.querySelector('.result-box');
-        surEl = document.createElement('div');
-        surEl.id = 'result-surplus';
-        surEl.className = 'res-surplus-sm';
-        box.appendChild(surEl);
-    }
-
-    if(isDone) {
-        nameEl.innerText = "계산 대기중"; nameEl.style.color = "#128CFF";
-        infoEl.innerText = "-"; runsEl.innerText = "0회"; apEl.innerText = "-";
-        surEl.innerHTML = ""; return;
-    }
-    if(!stage) {
-        nameEl.innerText = "추천 불가"; nameEl.style.color = "#FF5555";
-        infoEl.innerText = "-"; runsEl.innerText = "-"; apEl.innerText = "-";
-        surEl.innerHTML = ""; return;
-    }
-
-    nameEl.innerText = stage.name;
+    // 4. 시뮬레이션 (Greedy Algorithm)
+    // "현재 가장 부족한 재화를 가장 효율적으로 주는 곳을 1회 돈다"를 반복
     
-    let html = [];
-    stage.drops.forEach((base, i) => {
-        if(base > 0) {
-            const icon = (currencyIcons[i]) ? IMG_PATH+currencyIcons[i] : DEFAULT_IMG;
-            const bonusAmt = Math.ceil(base * (bonusVal/100));
+    // 안전장치: 무한 루프 방지 (최대 50,000회 제한)
+    let safetyLoop = 0; 
+    let currentNeeds = [...needs]; // 복사본
+
+    while(currentNeeds.some(n => n > 0) && safetyLoop < 50000) {
+        let bestStageOption = null;
+        let maxScore = -1;
+
+        // 모든 후보 스테이지 중 현재 상태에서 가장 효율 좋은 곳 탐색
+        for(let opt of stageOptions) {
+            let value = 0;
             
-            html.push(`
-                <span class="gain-item">
-                    <img src="${icon}" class="mini-icon"> <b>x${base}</b>
-                </span>
-            `);
-            
-            if(bonusAmt > 0) {
-                html.push(`
-                    <span class="gain-item">
-                        <span class="bonus-badge">Bonus</span>
-                        <img src="${icon}" class="mini-icon"> <b>+${bonusAmt}</b>
-                    </span>
-                `);
+            // 점수 계산: (아직 필요한 재화의 드랍량)의 합 / AP
+            for(let i=0; i<3; i++) {
+                if(currentNeeds[i] > 0) {
+                    // 필요량보다 더 많이 캐는 경우, 필요한 만큼만 점수에 반영 (Surplus 최소화 유도)
+                    // 다만 너무 딱 맞추려다 효율이 깨질 수 있으니, 
+                    // 단순하게 "필요한 재화라면 드랍량 전액 가산" 방식이 일반적인 이벤트 효율엔 더 적합합니다.
+                    value += opt.drops[i];
+                }
+            }
+
+            if(value > 0) {
+                let score = value / opt.ap;
+                // 같은 점수면 AP가 낮은 곳(빠른 회전) 혹은 높은 곳 등 기준을 정할 수 있음
+                if(score > maxScore) {
+                    maxScore = score;
+                    bestStageOption = opt;
+                }
             }
         }
-    });
 
-    infoEl.innerHTML = html.join('');
-    runsEl.innerText = runs + "회";
+        // 더 이상 캘 곳이 없거나 효율이 0이면 중단 (예: 필요한 재화를 주는 스테이지가 없음)
+        if(!bestStageOption) break;
+
+        // 선택된 스테이지 1회 수행
+        bestStageOption.runCount++;
+        safetyLoop++;
+
+        // 남은 필요량 갱신
+        for(let i=0; i<3; i++) {
+            currentNeeds[i] -= bestStageOption.drops[i];
+        }
+    }
+
+    // 5. 결과 정리 (횟수가 0보다 큰 스테이지들만 추림)
+    const finalResults = stageOptions.filter(opt => opt.runCount > 0);
     
+    // 남은 재화(Surplus) 계산 (음수면 남는 것)
+    // currentNeeds가 음수면 그만큼 초과 달성한 것
+    const surplus = currentNeeds.map(n => n < 0 ? Math.abs(n) : 0);
+
+    displayResult(finalResults, surplus);
+    initDropTable(); // 드랍 테이블 갱신 (선택적)
+}
+
+function displayResult(results, surplusArray) {
+    // 결과 표시할 DOM 요소들
+    const nameEl = document.getElementById('recStageName'); // 기존: 제목
+    const infoEl = document.getElementById('recStageInfo'); // 기존: 드랍 아이콘
+    const runsEl = document.getElementById('result-runs');  // 기존: 횟수
+    const apEl = document.getElementById('result-ap');      // 기존: AP
+    let surEl = document.getElementById('result-surplus');  // 잉여 재화 표시
+
+    // 잉여 재화 표시 박스가 없으면 생성
+    if (!surEl) {
+        const box = document.querySelector('.result-box');
+        if(box) {
+            surEl = document.createElement('div');
+            surEl.id = 'result-surplus';
+            surEl.className = 'res-surplus-sm';
+            surEl.style.marginTop = '10px';
+            surEl.style.fontSize = '0.85rem';
+            surEl.style.color = '#ffaa00';
+            box.appendChild(surEl);
+        }
+    }
+
+    // 1. 계산할 필요가 없거나 결과가 없는 경우 처리
+    if (!results || results.length === 0) {
+        if(results === null) {
+             nameEl.innerText = "추천 불가 (필터 확인)";
+             nameEl.style.color = "#FF5555";
+        } else {
+             nameEl.innerText = "목표 달성 완료";
+             nameEl.style.color = "#128CFF";
+        }
+        infoEl.innerText = "-";
+        runsEl.innerText = "-";
+        apEl.innerText = "0";
+        if(surEl) surEl.innerHTML = "";
+        return;
+    }
+
+    // 2. 다중 결과 렌더링을 위해 HTML 재구성
+    // 기존 UI가 단일 스테이지용이라, 내용을 덮어씌웁니다.
+    
+    // 전체 총합 계산
+    let totalAp = 0;
+    let totalRuns = 0;
+    
+    // 결과 리스트 HTML 생성
+    let listHtml = `<div style="display:flex; flex-direction:column; gap:8px; width:100%;">`;
+    
+    results.forEach(res => {
+        totalRuns += res.runCount;
+        totalAp += (res.runCount * res.ap);
+
+        // 해당 스테이지의 주요 드랍품 표시
+        let dropIcons = '';
+        res.data.drops.forEach((base, idx) => {
+            if(base > 0 && currencyIcons[idx]) {
+                dropIcons += `<img src="${IMG_PATH + currencyIcons[idx]}" style="width:14px; height:14px; margin-right:2px; vertical-align:middle;">`;
+            }
+        });
+
+        listHtml += `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.05); padding:6px 10px; border-radius:4px;">
+                <div style="text-align:left;">
+                    <div style="font-weight:bold; font-size:0.95rem;">${res.data.name}</div>
+                    <div style="font-size:0.8rem; opacity:0.7;">${dropIcons}</div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="color:#128CFF; font-weight:bold;">${res.runCount}회</div>
+                    <div style="font-size:0.8rem; color:#aaa;">${(res.runCount * res.ap).toLocaleString()} AP</div>
+                </div>
+            </div>
+        `;
+    });
+    listHtml += `</div>`;
+
+    // 3. 화면에 주입
+    // 기존 제목 영역(recStageName)을 "추천 조합"으로 변경하고
+    // 상세 영역(recStageInfo)에 리스트를 넣습니다.
+    nameEl.innerText = "추천 파밍 조합";
+    nameEl.style.color = "#ddd";
+    
+    // 기존 스타일 덮어쓰기 (flex 정렬 등 해제 필요할 수 있음)
+    infoEl.style.justifyContent = 'normal'; 
+    infoEl.innerHTML = listHtml;
+
+    // 총 합계 표시
+    runsEl.innerText = `총 ${totalRuns}회`;
     apEl.innerHTML = `
-        <div style="display:flex; align-items:center; justify-content:center; gap:4px;">
+        <div style="display:flex; align-items:center; justify-content:center; gap:4px; color:#ffdd55;">
             <img src="${AP_ICON_PATH}" style="width:16px; height:16px; object-fit:contain;">
-            <span>${ap.toLocaleString()}</span>
+            <span>${totalAp.toLocaleString()}</span>
         </div>
     `;
 
-    if(surplus > 0) {
-        const displayIdx = tabDisplayMap[currentTab];
-        const icon = (currencyIcons[displayIdx]) ? IMG_PATH+currencyIcons[displayIdx] : DEFAULT_IMG;
-        surEl.innerHTML = `⚠️ <img src="${icon}" class="mini-icon-white" style="width:12px;height:12px"> ${surplus}개 남음`;
-    } else {
-        surEl.innerHTML = "";
+    // 4. 남는 재화(Surplus) 표시
+    let surplusHtml = [];
+    if(surplusArray) {
+        surplusArray.forEach((amt, idx) => {
+            if(amt > 0) {
+                 const displayIdx = tabDisplayMap[idx]; // 실제 아이콘 매핑
+                 const icon = (currencyIcons[displayIdx]) ? IMG_PATH + currencyIcons[displayIdx] : DEFAULT_IMG;
+                 surplusHtml.push(`<span style="margin-right:8px;"><img src="${icon}" style="width:12px; vertical-align:middle"> +${amt}</span>`);
+            }
+        });
+    }
+
+    if(surEl) {
+        if(surplusHtml.length > 0) {
+            surEl.innerHTML = `⚠️ 남는 재화: ` + surplusHtml.join('');
+        } else {
+            surEl.innerHTML = `<span style="color:#66cc66">✔ 낭비 없음 (깔끔!)</span>`;
+        }
     }
 }
 
