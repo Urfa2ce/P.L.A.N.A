@@ -1019,3 +1019,263 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 
 .bd-val { font-weight: 900; font-size: 1.1rem; color: var(--ba-blue); margin-top: 2px; }
 .bd-line { width: 1px; height: 30px; background: #e0e0e0; }
+
+/* 버전 표시 푸터 */
+.version-info {
+    text-align: center;
+    font-size: 0.75rem;      /* 글자 크기 작게 */
+    color: #aaa;             /* 회색으로 흐릿하게 */
+    margin-top: 40px;        /* 위쪽 여백 */
+    padding-top: 20px;       /* 내부 여백 */
+    border-top: 1px solid #eee; /* 윗부분에 얇은 선 그리기 (선택사항) */
+    font-family: monospace;  /* 개발자스러운 폰트 (선택사항) */
+}
+
+/* ==========================================================================
+   [성능 최적화] CLS(화면 밀림) 방지 코드
+   ========================================================================== */
+
+/* 1. 결과 박스 높이 미리 확보 */
+/* 기존 140px -> 200px로 늘려서, 내용이 들어와도 박스가 커지지 않게 함 */
+.recommend-box, 
+.result-box.compact-box {
+    min-height: 200px !important; 
+    transition: none !important; /* 높이 변화 애니메이션 제거 (즉시 적용) */
+}
+
+/* 2. 계산 영역 전체 틀 고정 */
+/* 입력창과 결과창을 감싸는 전체 박스가 로딩 중에 찌그러지지 않게 함 */
+.calc-area {
+    min-height: 380px; 
+    contain: content; /* 브라우저에게 이 박스 크기가 외부 영향을 안 받는다고 힌트 줌 */
+}
+/* ==========================================================================
+   [NEW] 사이드바 레이아웃
+   ========================================================================== */
+.app-wrapper {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    justify-content: center;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.sidebar {
+    width: 250px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.banner-area {
+    width: 100%;
+    cursor: pointer;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    background: white;
+    transition: transform 0.2s;
+    text-align: center;
+}
+.banner-area:hover { transform: translateY(-2px); }
+.banner-area img { width: 100%; display: block; }
+.banner-placeholder { padding: 20px; font-weight: bold; color: var(--ba-blue); }
+
+/* 이벤트 리스트 박스 */
+.event-list-box {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    padding: 10px;
+    border: 1px solid #eee;
+}
+.event-list-box.hidden { display: none; }
+
+.event-item {
+    padding: 10px;
+    border-bottom: 1px dashed #eee;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.event-item:last-child { border-bottom: none; }
+.event-item:hover { background: #f5f5f5; border-radius: 6px; }
+.event-item.active { background: #E3F2FD; color: var(--ba-blue); font-weight: bold; border-radius: 6px; }
+
+.ev-status { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; color: white; margin-right: 5px; }
+.ev-status.ing { background-color: #00D1FF; }
+.ev-status.end { background-color: #aaa; }
+
+/* 모바일 대응: 사이드바를 위로 올리거나 숨김 */
+@media (max-width: 900px) {
+    .app-wrapper { flex-direction: column; align-items: center; }
+    .sidebar { width: 100%; max-width: 600px; position: static; }
+}
+
+/* style.css 맨 아래에 추가 */
+
+/* 이벤트 리스트 아이템 (기존 스타일 덮어쓰기) */
+.event-item {
+    padding: 8px;
+    border-bottom: 1px dashed #eee;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: transparent; /* 배경 투명 */
+}
+
+.event-item:hover {
+    background-color: #f0f8ff;
+    transform: translateY(-2px);
+}
+
+/* 선택된 아이템 강조 */
+.event-item.active {
+    background-color: #E3F2FD;
+    border: 2px solid var(--ba-blue);
+    border-radius: 8px;
+    padding: 6px; /* 테두리 때문에 패딩 미세 조정 */
+}
+
+/* 이미지 래퍼 (배지 위치 잡기용) */
+.list-img-wrapper {
+    position: relative;
+    width: 100%;
+    border-radius: 6px;
+    overflow: hidden;
+    line-height: 0; /* 이미지 하단 여백 제거 */
+}
+
+/* 리스트 내부 썸네일 이미지 */
+.list-banner-thumb {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #eee;
+}
+
+/* 진행중/종료 배지 (이미지 위에 띄우기) */
+.ev-status-badge {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    z-index: 2;
+}
+
+.ev-status-badge.ing { background-color: #00D1FF; }
+.ev-status-badge.end { background-color: #888; }
+
+/* ==========================================================================
+   [NEW] 이벤트 리스트 배너 오버레이 스타일
+   ========================================================================== */
+
+/* 리스트 아이템 기본 스타일 재정의 */
+.event-item {
+    padding: 8px; /* 간격 조정 */
+    border-bottom: none; /* 기존 선 제거 */
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.event-item:hover {
+    background: transparent; /* 배경색 변경 대신 */
+    transform: scale(1.02); /* 살짝 커지는 효과 */
+}
+
+/* 선택된 아이템 강조 */
+.event-item.active .banner-wrapper {
+    border: 3px solid var(--ba-blue); /* 파란색 테두리 */
+    box-shadow: 0 0 10px rgba(18, 140, 255, 0.3);
+}
+
+/* [핵심] 이미지와 배지를 감싸는 컨테이너 */
+.banner-wrapper {
+    position: relative; /* 자식 배지의 기준점이 됩니다. */
+    width: 100%;
+    border-radius: 8px; /* 모서리 둥글게 */
+    overflow: hidden;   /* 이미지가 튀어나가지 않게 */
+    border: 1px solid #eee; /* 기본 테두리 */
+    line-height: 0;     /* 이미지 하단 공백 제거 */
+}
+
+/* 리스트 내부 배너 이미지 */
+.list-banner-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+}
+
+/* ==========================================================================
+   [재수정] 짙은 반투명 남색 스타일 (요청하신 어두운 말풍선 스타일)
+   ========================================================================== */
+
+.status-badge-overlay {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    
+    /* 레이아웃 */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* 크기 자동 조절 (글자 길이에 맞춤) */
+    width: auto;
+    height: 24px;       /* 높이는 납작하게 고정 */
+    padding: 0 10px;    /* 좌우 여백 */
+    
+    /* 폰트: 흰색, 굵게 */
+    color: #ffffff;
+    font-size: 0.75rem; 
+    font-weight: 700;
+    font-family: 'Noto Sans KR', sans-serif;
+    letter-spacing: -0.5px;
+    white-space: nowrap;
+
+    /* ▼▼▼ 핵심 스타일 변경 ▼▼▼ */
+    /* 배경: 짙은 남색 + 반투명 (투명도 0.9) */
+    background-color: rgba(45, 62, 80, 0.9);
+    
+    /* 테두리 없음 */
+    border: none;
+    
+    /* 모서리: 둥근 알약 모양 */
+    border-radius: 30px;
+    
+    /* 그림자: 글씨가 배경에 묻히지 않게 살짝 */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+    
+    z-index: 10;
+}
+
+/* [진행중] 기본 짙은 남색 */
+.status-badge-overlay.ing {
+    background-color: rgba(45, 62, 80, 0.9);
+}
+
+/* [종료] 약간 더 어두운 회색빛 (구분을 위해) */
+.status-badge-overlay.end {
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #cccccc; /* 종료된 건 글씨도 살짝 어둡게 */
+}
+
+
+/* style.css 맨 아래 추가 */
+
+/* [예정] 시작 전 (노란색/주황색 계열) */
+.status-badge-overlay.ready {
+    background-color: rgba(255, 140, 0, 0.9); /* 오렌지색 */
+    color: white;
+}

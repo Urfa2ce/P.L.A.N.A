@@ -8,7 +8,7 @@
 </head>
 <body>
 
-<div class="ap-ios-wrapper">
+<!-- <div class="ap-ios-wrapper">
     <div id="apIconBtn" class="ap-ios-icon" onclick="toggleApWidget()" title="AP 계산기 열기">
         <img src="src/ui/Currency_Icon_AP.png" alt="AP" onerror="this.style.display='none'">
     </div>
@@ -29,123 +29,147 @@
             <div id="apResult" class="ap-ios-result">입력 대기 중...</div>
         </div>
     </div>
-</div>
+</div> -->
 
-<div class="container">
-    <h1>이벤트 상점 계산기</h1>
+<div class="app-wrapper">
 
-    <div class="bonus-widget-container">
-        <div class="bonus-toggle-header" onclick="toggleStudentSelector()">
-            <div class="b-title">
-                <span>보너스 학생 목록</span>
-            </div>
-            <span id="studentToggleIcon">▼</span>
+    <aside class="sidebar">
+        <div class="banner-area" onclick="toggleEventListUI()">
+            <img src="src/event/banners/Event_Banner_852_Jp.webp" alt="Event Banner" onerror="this.style.display='none'">
+            <div class="banner-placeholder">EVENT LIST</div>
         </div>
- 
-        <div id="studentSelectorBox" class="student-selector-body hidden">
-            
-            <div class="bonus-dashboard">
-                <div id="bd-item-0" class="bd-item" onclick="toggleBonusFilter(0)">
-                    <div class="bd-icon-box">
-                        <img id="bd-icon-0" src="" class="bd-icon" onerror="this.style.display='none'">
+        
+        <div id="eventListContainer" class="event-list-box hidden">
+        </div>
+    </aside>
+
+    <div class="container">
+        <h1>이벤트 상점 계산기</h1>
+
+        <div class="bonus-widget-container">
+            <div class="bonus-toggle-header" onclick="toggleStudentSelector()">
+                <div class="b-title">
+                    <span>보너스 학생 목록</span>
+                </div>
+                <span id="studentToggleIcon">▼</span>
+            </div>
+     
+            <div id="studentSelectorBox" class="student-selector-body hidden">
+                <div class="bonus-dashboard">
+    <div id="bd-item-0" class="bd-item" onclick="toggleBonusFilter(0)">
+        <div class="bd-icon-box">
+            <img id="bd-icon-0" src="" class="bd-icon" onerror="this.style.display='none'">
+        </div>
+        <span id="bd-val-0" class="bd-val">0%</span>
+    </div>
+    <div class="bd-line"></div>
+    
+    <div id="bd-item-1" class="bd-item" onclick="toggleBonusFilter(1)">
+        <div class="bd-icon-box">
+            <img id="bd-icon-1" src="" class="bd-icon" onerror="this.style.display='none'">
+        </div>
+        <span id="bd-val-1" class="bd-val">0%</span>
+    </div>
+    <div class="bd-line"></div>
+    
+    <div id="bd-item-2" class="bd-item" onclick="toggleBonusFilter(2)">
+        <div class="bd-icon-box">
+            <img id="bd-icon-2" src="" class="bd-icon" onerror="this.style.display='none'">
+        </div>
+        <span id="bd-val-2" class="bd-val">0%</span>
+    </div>
+
+    <div class="bd-line"></div>
+    <div id="bd-item-3" class="bd-item" onclick="toggleBonusFilter(3)">
+        <div class="bd-icon-box">
+            <img id="bd-icon-3" src="" class="bd-icon" onerror="this.style.display='none'">
+        </div>
+        <span id="bd-val-3" class="bd-val">0%</span>
+    </div>
+    </div>
+                <div class="student-tabs">
+                    <div class="s-tab striker active" onclick="toggleRoleFilter('STRIKER', this)">STRIKER</div>
+                    <div class="s-tab special active" onclick="toggleRoleFilter('SPECIAL', this)">SPECIAL</div>
+                </div>
+                <div id="student-grid" class="student-grid"></div>
+            </div>
+        </div>
+
+        <div class="shop-tabs">
+            <div class="tab-btn active" onclick="switchTab(0)">
+                <img src="" class="tab-icon" alt="A" onerror="this.style.display='none'"> 상점 1
+            </div>
+            <div class="tab-btn" onclick="switchTab(1)">
+                <img src="" class="tab-icon" alt="B" onerror="this.style.display='none'"> 상점 2
+            </div>
+            <div class="tab-btn" onclick="switchTab(2)">
+                <img src="" class="tab-icon" alt="C" onerror="this.style.display='none'"> 상점 3
+            </div>
+        </div>
+
+        <div id="shop-container"></div>
+
+        <div class="calc-area">
+            <div class="row inputs-row">
+                <div class="col">
+                    <label>필요 재화</label>
+                    <input type="number" id="targetAmount" class="main-input" placeholder="0" oninput="manualTarget(this.value)">
+                </div>
+                <div class="col">
+                    <label>현재 보유</label>
+                    <input type="number" id="currentAmount" class="main-input" placeholder="0" oninput="updateCurrent(this.value)">
+                </div>
+                <div class="col">
+                    <label>보너스%</label>
+                    <input type="number" id="bonusRate" class="main-input" value="0" min="0" placeholder="0" oninput="calculate()">
+                </div>
+            </div>
+
+            <div class="row result-row">
+                <div class="col">
+                    <label>추천 스테이지</label>
+                    <div class="recommend-box">
+                        <div id="recStageName" class="rec-name">계산 중...</div>
+                        <div id="recStageInfo" class="rec-info">-</div>
                     </div>
-                    <span id="bd-val-0" class="bd-val">0%</span>
                 </div>
-                <div class="bd-line"></div>
-                <div id="bd-item-1" class="bd-item" onclick="toggleBonusFilter(1)">
-                    <div class="bd-icon-box">
-                        <img id="bd-icon-1" src="" class="bd-icon" onerror="this.style.display='none'">
+                <div class="col">
+                    <label>계산 결과</label>
+                    <div class="result-box compact-box">
+                        <div class="res-mini-title">필요 소탕</div>
+                        <div id="result-runs" class="res-value-sm">0회</div>
+                        <div id="result-ap" class="res-sub-sm">(0 AP)</div>
+                        <div id="result-surplus" class="res-surplus-sm"></div>
                     </div>
-                    <span id="bd-val-1" class="bd-val">0%</span>
                 </div>
-                <div class="bd-line"></div>
-                <div id="bd-item-2" class="bd-item" onclick="toggleBonusFilter(2)">
-                    <div class="bd-icon-box">
-                        <img id="bd-icon-2" src="" class="bd-icon" onerror="this.style.display='none'">
+            </div>
+        </div>
+
+        <div class="drop-info-area">
+            <div class="filter-section">
+                <div class="filter-header">
+                    <h3>🔍 계산할 지역 선택</h3>
+                    <div class="filter-btns">
+                        <button class="small-btn" onclick="toggleAllStages(true)">전체 선택</button>
+                        <button class="small-btn outline" onclick="toggleAllStages(false)">전체 해제</button>
                     </div>
-                    <span id="bd-val-2" class="bd-val">0%</span>
                 </div>
+                <div id="stage-filter-container" class="filter-grid"></div>
             </div>
-            <div class="student-tabs">
-                <div class="s-tab striker active" onclick="toggleRoleFilter('STRIKER', this)">STRIKER</div>
-                <div class="s-tab special active" onclick="toggleRoleFilter('SPECIAL', this)">SPECIAL</div>
-            </div>
-            <div id="student-grid" class="student-grid"></div>
-        </div>
-    </div>
 
-    <div class="shop-tabs">
-        <div class="tab-btn active" onclick="switchTab(0)">
-            <img src="" class="tab-icon" alt="A" onerror="this.style.display='none'"> 상점 1
-        </div>
-        <div class="tab-btn" onclick="switchTab(1)">
-            <img src="" class="tab-icon" alt="B" onerror="this.style.display='none'"> 상점 2
-        </div>
-        <div class="tab-btn" onclick="switchTab(2)">
-            <img src="" class="tab-icon" alt="C" onerror="this.style.display='none'"> 상점 3
-        </div>
-    </div>
-
-    <div id="shop-container"></div>
-
-    <div class="calc-area">
-        <div class="row inputs-row">
-            <div class="col">
-                <label>필요 재화</label>
-                <input type="number" id="targetAmount" class="main-input" placeholder="0" oninput="manualTarget(this.value)">
+            <h2>📅 스테이지 드랍 테이블</h2>
+            <div class="drop-table-header">
+                <span>지역명 (AP)</span>
+                <span>드랍 아이템 (기본 + 보너스)</span>
             </div>
-            <div class="col">
-                <label>현재 보유</label>
-                <input type="number" id="currentAmount" class="main-input" placeholder="0" oninput="updateCurrent(this.value)">
-            </div>
-            <div class="col">
-                <label>보너스 합계 (%)</label>
-                <input type="number" id="bonusRate" class="main-input" value="0" min="0" placeholder="0" oninput="calculate()">
-            </div>
+            <div id="drop-table-list"></div>
         </div>
 
-        <div class="row result-row">
-            <div class="col">
-                <label>추천 스테이지</label>
-                <div class="recommend-box">
-                    <div id="recStageName" class="rec-name">계산 중...</div>
-                    <div id="recStageInfo" class="rec-info">-</div>
-                </div>
-            </div>
-            <div class="col">
-                <label>계산 결과</label>
-                <div class="result-box compact-box">
-                    <div class="res-mini-title">필요 소탕</div>
-                    <div id="result-runs" class="res-value-sm">0회</div>
-                    <div id="result-ap" class="res-sub-sm">(0 AP)</div>
-                    <div id="result-surplus" class="res-surplus-sm"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="drop-info-area">
-        <div class="filter-section">
-            <div class="filter-header">
-                <h3>🔍 계산할 지역 선택</h3>
-                <div class="filter-btns">
-                    <button class="small-btn" onclick="toggleAllStages(true)">전체 선택</button>
-                    <button class="small-btn outline" onclick="toggleAllStages(false)">전체 해제</button>
-                </div>
-            </div>
-            <div id="stage-filter-container" class="filter-grid"></div>
+        <div class="version-info">
+            Blue Archive Calculator v1.1.0 | Updated 2025.12.03
         </div>
 
-        <h2>📅 스테이지 드랍 테이블</h2>
-        <div class="drop-table-header">
-            <span>지역명 (AP)</span>
-            <span>드랍 아이템 (기본 + 보너스)</span>
-        </div>
-        <div id="drop-table-list"></div>
-    </div>
-</div>
-
-<script src="script.js" defer></script>
+    </div> </div> <script type="module" src="/js/main.js"></script>
 
 </body>
 </html>

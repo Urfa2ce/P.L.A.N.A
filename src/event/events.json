@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "name": "현재 진행중인 이벤트 (예시)",
+    "bannerImg": "src/event/banners/Event_Banner_841_Jp.webp",
+    "dataFile": "src/event/data/ev_841.json",
+    "startDate": "2025-12-03T10:59:00",
+    "endDate": "2025-12-17T10:59:59"
+  },
+  {
+    "id": 2,
+    "name": "지난 이벤트 (예시)",
+    "bannerImg": "src/event/banners/Event_Banner_852_Jp.webp",
+    "dataFile": "src/event/data/ev_852.json",
+    "startDate": "2025-11-15T11:00:00",
+    "endDate": "2025-12-03T10:59:59"
+  }
+]
