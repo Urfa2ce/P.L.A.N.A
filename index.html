@@ -34,14 +34,16 @@
 <div class="app-wrapper">
 
     <aside class="sidebar">
-        <div class="banner-area" onclick="toggleEventListUI()">
-            <img src="src/event/banners/Event_Banner_852_Jp.webp" alt="Event Banner" onerror="this.style.display='none'">
-            <div class="banner-placeholder">EVENT LIST</div>
-        </div>
+    <div class="banner-area" onclick="toggleEventListUI()"style="position: relative;">
+        <img src="" alt="Event Banner" onerror="this.style.display='none'">
         
-        <div id="eventListContainer" class="event-list-box hidden">
-        </div>
-    </aside>
+        <span id="mainBannerBadge" class="status-badge-overlay" style="display:none;"></span>
+        <div class="banner-placeholder">EVENT LIST</div>
+    </div>
+    
+    <div id="eventListContainer" class="event-list-box hidden">
+    </div>
+</aside>
 
     <div class="container">
         <h1>이벤트 상점 계산기</h1>

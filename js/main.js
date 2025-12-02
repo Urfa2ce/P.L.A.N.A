@@ -22,9 +22,12 @@ function getStatusText(status) {
 }
 
 // [수정됨] 이벤트 목록 로드 및 자동 상태 반영
+// [수정] 이벤트 목록 로드 함수
+// [js/main.js]
+
+// 이벤트 목록 로드 및 초기 배너 설정 함수
 async function loadEventList() {
     try {
-        // [경로 확인] events.json 파일 위치에 맞게 수정하세요 (src/event/data/events.json 등)
         const res = await fetch('src/event/events.json'); 
         if(!res.ok) throw new Error("events.json 로드 실패");
         const events = await res.json();
@@ -32,31 +35,39 @@ async function loadEventList() {
         const listContainer = document.getElementById('eventListContainer');
         listContainer.innerHTML = '';
 
-        // [자동 로드] 현재 진행중인 이벤트 찾기
+        // 1. 현재 진행중('ing')인 이벤트 찾기
         let targetEvent = events.find(ev => getEventStatus(ev.startDate, ev.endDate) === 'ing');
         
-        // 진행중인 게 없거나 아직 로드 안 됐으면, 목록의 첫 번째(최신) 이벤트를 띄움
-        if (!state.currentJsonPath) { 
-            if (!targetEvent) targetEvent = events[0]; 
-            if (targetEvent) {
+        // 2. 진행중인 게 없으면? 목록의 맨 첫 번째(최신) 이벤트를 보여줌
+        if (!targetEvent) {
+            targetEvent = events[0];
+        }
+
+        // 3. [핵심 수정] 조건 따지지 말고 무조건 배너 이미지부터 박아넣음!
+        if (targetEvent) {
+            // 배너 이미지와 배지 즉시 업데이트 (이미지 src 채우고 display:block 처리됨)
+            updateMainBanner(targetEvent);
+            
+            // 데이터 로드는 필요할 때만 (현재 로드된 파일과 다를 때, 혹은 초기 상태일 때)
+            // 'data.json'은 store.js의 기본값이므로, 이것도 초기 로드로 간주해서 덮어씀
+            if (!state.currentJsonPath || state.currentJsonPath === 'data.json') {
                 loadDataAndInit(targetEvent.dataFile);
-                updateMainBanner(targetEvent.bannerImg);
             }
         }
 
+        // 4. 리스트 아이템 생성
         events.forEach(ev => {
             const div = document.createElement('div');
             div.className = 'event-item';
             
-            // 상태 계산
             const statusKey = getEventStatus(ev.startDate, ev.endDate);
             const statusLabel = getStatusText(statusKey);
 
-            if(ev.dataFile === state.currentJsonPath) {
+            // 현재 보고 있는 데이터와 일치하면 active 클래스
+            if(ev.dataFile === state.currentJsonPath || (state.currentJsonPath === 'data.json' && ev === targetEvent)) {
                 div.classList.add('active');
             }
             
-            // [배지 오버레이 스타일 적용]
             div.innerHTML = `
                 <div class="banner-wrapper">
                     <img src="${ev.bannerImg}" class="list-banner-img" alt="${ev.name}">
@@ -66,7 +77,7 @@ async function loadEventList() {
             
             div.onclick = () => {
                 loadDataAndInit(ev.dataFile);
-                updateMainBanner(ev.bannerImg);
+                updateMainBanner(ev); 
                 document.querySelectorAll('.event-item').forEach(el => el.classList.remove('active'));
                 div.classList.add('active');
             };
@@ -75,12 +86,39 @@ async function loadEventList() {
     } catch (e) { console.log("이벤트 목록 로드 에러:", e); }
 }
 
-// [신규] 좌측 메인 배너 이미지 변경 함수
-function updateMainBanner(imgSrc) {
+// [수정] 메인 배너 업데이트 함수 (안전장치 추가됨)
+function updateMainBanner(eventData) {
+    // 1. 이미지 변경
     const bannerImg = document.querySelector('.banner-area img');
     if (bannerImg) {
+        // eventData가 객체면 .bannerImg를 쓰고, 혹시 옛날 코드처럼 문자열이 넘어오면 그대로 씀 (에러 방지)
+        const imgSrc = eventData.bannerImg || eventData;
         bannerImg.src = imgSrc;
         bannerImg.style.display = 'block';
+    }
+
+    // 2. 배지 상태 변경 (핵심 로직)
+    const badgeEl = document.getElementById('mainBannerBadge');
+    if (badgeEl) {
+        // eventData가 정상적인 객체일 때만 배지 계산
+        if (typeof eventData === 'object' && eventData.startDate) {
+            const statusKey = getEventStatus(eventData.startDate, eventData.endDate);
+            const statusLabel = getStatusText(statusKey);
+
+            // 클래스와 텍스트 적용 후 보이게 설정
+            badgeEl.className = `status-badge-overlay ${statusKey}`;
+            badgeEl.innerText = statusLabel;
+            badgeEl.style.display = 'inline-flex';
+            
+            // 위치 보정 (혹시 배너 밖으로 나가면)
+            badgeEl.style.position = 'absolute';
+            badgeEl.style.top = '10px';
+            badgeEl.style.left = '10px';
+            badgeEl.style.zIndex = '10';
+        } else {
+            // 데이터가 없으면 배지 숨김
+            badgeEl.style.display = 'none';
+        }
     }
 }
 

@@ -1,3 +1,4 @@
+
 /* ==========================================================================
    1. 기본 설정 (Variables & Reset)
    ========================================================================== */
@@ -36,9 +37,16 @@ body {
 
 h1 {
     text-align: center;
-    color: var(--ba-blue);
+    color: #29415A;
     margin-bottom: 20px;
     font-weight: 800;
+    text-shadow: 
+        /* 8방향으로 하얀 그림자를 줘서 테두리처럼 보이게 함 */
+        2px 0 0 #fff, -2px 0 0 #fff, 0 2px 0 #fff, 0 -2px 0 #fff,
+        1.5px 1.5px 0 #fff, -1.5px -1.5px 0 #fff, 1.5px -1.5px 0 #fff, -1.5px 1.5px 0 #fff,
+        /* 살짝 그림자를 줘서 입체감 추가 */
+        0 3px 5px rgba(0,0,0,0.15);
+
 }
 
 /* ==========================================================================
@@ -1072,6 +1080,8 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
     gap: 10px;
 }
 
+/* style.css 에서 .banner-area 찾아서 position: relative; 한 줄 추가 */
+
 .banner-area {
     width: 100%;
     cursor: pointer;
@@ -1081,10 +1091,18 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
     background: white;
     transition: transform 0.2s;
     text-align: center;
+    /* ▼▼▼ [추가] 배지 위치 잡기 위해 필수 ▼▼▼ */
+    position: relative; 
 }
 .banner-area:hover { transform: translateY(-2px); }
 .banner-area img { width: 100%; display: block; }
-.banner-placeholder { padding: 20px; font-weight: bold; color: var(--ba-blue); }
+.banner-placeholder { padding: 20px; font-weight: bold; color: #29415A;
+text-shadow: 
+        /* 8방향으로 하얀 그림자를 줘서 테두리처럼 보이게 함 */
+        2px 0 0 #fff, -2px 0 0 #fff, 0 2px 0 #fff, 0 -2px 0 #fff,
+        1.5px 1.5px 0 #fff, -1.5px -1.5px 0 #fff, 1.5px -1.5px 0 #fff, -1.5px 1.5px 0 #fff,
+        /* 살짝 그림자를 줘서 입체감 추가 */
+        0 3px 5px rgba(0,0,0,0.15);}
 
 /* 이벤트 리스트 박스 */
 .event-list-box {
@@ -1181,11 +1199,10 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
    ========================================================================== */
 
 /* 리스트 아이템 기본 스타일 재정의 */
-.event-item {
-    padding: 8px; /* 간격 조정 */
-    border-bottom: none; /* 기존 선 제거 */
-    cursor: pointer;
-    transition: transform 0.2s;
+.event-item.active {
+    background-color: transparent !important; /* 배경색도 없애서 투명하게 */
+    border: none !important;                  /* 바깥 테두리 삭제 */
+    padding: 8px;                             /* 간격만 유지 */
 }
 
 .event-item:hover {
