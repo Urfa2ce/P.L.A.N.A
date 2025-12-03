@@ -68,9 +68,9 @@
         { "name": "파손된 로마 12면체", "img": "2D/opatsu/Item_Icon_Material_RomanDice_1.webp", "price": 15, "qty": 60 },
         { "name": "수리된 로마 12면체", "img": "2D/opatsu/Item_Icon_Material_RomanDice_2.webp", "price": 50, "qty": 32 },
         { "name": "온전한 로마 12면체", "img": "2D/opatsu/Item_Icon_Material_RomanDice_3.webp", "price": 150, "qty": 15 },
-        { "name": "귀여운 그릇 세트", "img": "2D/favor/Item_Icon_Favor_24.webp", "price": 200, "qty": 10 },
-        { "name": "자수가 놓인 손수건", "img": "2D/favor/Item_Icon_Favor_31.webp", "price": 200, "qty": 10 },
-        { "name": "반짇고리 키트", "img": "2D/favor/Item_Icon_Favor_Lv2_9.webp", "price": 300, "qty": 1 },
+        { "name": "귀여운 식기 세트", "img": "2D/favor/Item_Icon_Favor_24.webp", "price": 200, "qty": 10 },
+        { "name": "자수 손수건", "img": "2D/favor/Item_Icon_Favor_31.webp", "price": 200, "qty": 10 },
+        { "name": "재봉 세트", "img": "2D/favor/Item_Icon_Favor_Lv2_9.webp", "price": 300, "qty": 1 },
         { "name": "화려한 펜라이트\n(재화 교환)", "img": "event/data/841/Item_Icon_Event_Token_2_S43.webp", "price": 5, "qty": -1 }
     ],
 
@@ -88,31 +88,31 @@
         { "name": "파손된 아틀란티스 메달", "img": "2D/opatsu/Item_Icon_Material_AtlantisMedal_1.webp", "price": 15, "qty": 60 },
         { "name": "마모된 아틀란티스 메달", "img": "2D/opatsu/Item_Icon_Material_AtlantisMedal_2.webp", "price": 50, "qty": 32 },
         { "name": "온전한 아틀란티스 메달", "img": "2D/opatsu/Item_Icon_Material_AtlantisMedal_3.webp", "price": 150, "qty": 15 },
-        { "name": "건강보조식품", "img": "2D/favor/Item_Icon_Favor_33.webp", "price": 200, "qty": 10 },
-        { "name": "코스프레용 뱅뱅이 안경", "img": "2D/favor/Item_Icon_Favor_18.webp", "price": 200, "qty": 10 },
-        { "name": "밀피유의 정통 파르페", "img": "2D/favor/Item_Icon_Favor_Lv2_4.webp", "price": 300, "qty": 1 },
+        { "name": "건강 보조제", "img": "2D/favor/Item_Icon_Favor_33.webp", "price": 200, "qty": 10 },
+        { "name": "코스프레 뱅뱅이 안경", "img": "2D/favor/Item_Icon_Favor_18.webp", "price": 200, "qty": 10 },
+        { "name": "밀푀유 전통 파르페", "img": "2D/favor/Item_Icon_Favor_Lv2_4.webp", "price": 300, "qty": 1 },
         { "name": "가구: 라이브 스테이지", "img": "2D/My_Event073_Idolstage.webp", "price": 2000, "qty": 1 },
         { "name": "쁘띠 케이크\n(재화 교환)", "img": "event/data/841/Item_Icon_Event_Token_3_S43.webp", "price": 5, "qty": -1 }
     ],
 
     
     [
-        { "name": "크레딧 500K", "img": "ui/Item_Icon_SecretStone.webp", "price": 250, "qty": 2 },
-        { "name": "크레딧 200K", "img": "ui/Item_Icon_SecretStone.webp", "price": 100, "qty": 5 },
-        { "name": "크레딧 100K", "img": "ui/Item_Icon_SecretStone.webp", "price": 50, "qty": 5 },
-        { "name": "크레딧 50K", "img": "ui/Item_Icon_SecretStone.webp", "price": 25, "qty": 5 },
-        { "name": "로혼치 사본 페이지", "img": "2D/opatsu/Item_Icon_Material_Rohonc_0.webp", "price": 5, "qty": 150 },
-        { "name": "파손된 로혼치 사본", "img": "2D/opatsu/Item_Icon_Material_Rohonc_0.webp", "price": 15, "qty": 60 },
-        { "name": "주해된 로혼치 사본", "img": "2D/opatsu/Item_Icon_Material_Rohonc_0.webp", "price": 50, "qty": 32 },
-        { "name": "온전한 로혼치 사본", "img": "2D/opatsu/Item_Icon_Material_Rohonc_0.webp", "price": 150, "qty": 15 },
+        { "name": "500K 크레딧", "img": "ui/Item_Icon_SecretStone.webp", "price": 250, "qty": 2 },
+        { "name": "200K 크레딧", "img": "ui/Item_Icon_SecretStone.webp", "price": 100, "qty": 5 },
+        { "name": "100K 크레딧", "img": "ui/Item_Icon_SecretStone.webp", "price": 50, "qty": 5 },
+        { "name": "50K 크레딧", "img": "ui/Item_Icon_SecretStone.webp", "price": 25, "qty": 5 },
+        { "name": "로홍크 사본 쪽", "img": "2D/opatsu/Item_Icon_Material_Rohonc_0.webp", "price": 5, "qty": 150 },
+        { "name": "파손된 로홍크 사본", "img": "2D/opatsu/Item_Icon_Material_Rohonc_0.webp", "price": 15, "qty": 60 },
+        { "name": "주해된 로홍크 사본", "img": "2D/opatsu/Item_Icon_Material_Rohonc_0.webp", "price": 50, "qty": 32 },
+        { "name": "온전한 로홍크 사본", "img": "2D/opatsu/Item_Icon_Material_Rohonc_0.webp", "price": 150, "qty": 15 },
         { "name": "만드라고라 씨앗", "img": "2D/opatsu/Item_Icon_Material_Mandragora_0.webp", "price": 5, "qty": 150 },
         { "name": "만드라고라 새싹", "img": "2D/opatsu/Item_Icon_Material_Mandragora_1.webp", "price": 15, "qty": 60 },
         { "name": "만드라고라 주스", "img": "2D/opatsu/Item_Icon_Material_Mandragora_2.webp", "price": 50, "qty": 32 },
         { "name": "만드라고라 농축액", "img": "2D/opatsu/Item_Icon_Material_Mandragora_3.webp", "price": 150, "qty": 15 },
         { "name": "웨이브캣 베개", "img": "2D/favor/Item_Icon_Favor_0.webp", "price": 200, "qty": 10 },
         { "name": "리본이 달린 곰인형", "img": "2D/favor/Item_Icon_Favor_20.webp", "price": 200, "qty": 10 },
-        { "name": "세련된 머리빗", "img": "2D/favor/Item_Icon_Favor_Lv2_6.webp", "price": 300, "qty": 1 },
-        { "name": "크레딧 5K", "img": "ui/Item_Icon_SecretStone.webp", "price": 5, "qty": -1 }
+        { "name": "세련된 빗", "img": "2D/favor/Item_Icon_Favor_Lv2_6.webp", "price": 300, "qty": 1 },
+        { "name": "크레딧\n5K", "img": "ui/Item_Icon_SecretStone.webp", "price": 5, "qty": -1 }
     ],
 
     
@@ -121,11 +121,11 @@
         { "name": "엘리그마 5개", "img": "ui/Item_Icon_SecretStone.webp", "price": 300, "qty": 10 },
         { "name": "비의서", "img": "", "price": 2000, "qty": 1 },
         { "name": "500K 크레딧", "img": "ui/Item_Icon_SecretStone.webp", "price": 250, "qty": 6 },
-        { "name": "미네(아이돌) 엘레프 5개", "img": "2D/Item_Icon_SecretStone_CH0275.webp", "price": 200, "qty": 5 },
-        { "name": "미네(아이돌) 엘레프 5개", "img": "2D/Item_Icon_SecretStone_CH0275.webp", "price": 250, "qty": 5 },
-        { "name": "미네(아이돌) 엘레프 5개", "img": "2D/Item_Icon_SecretStone_CH0275.webp", "price": 300, "qty": 5 },
-        { "name": "미네(아이돌) 엘레프 5개", "img": "2D/Item_Icon_SecretStone_CH0275.webp", "price": 350, "qty": 5 },
-        { "name": "미네(아이돌) 엘레프", "img": "2D/Item_Icon_SecretStone_CH0275.webp", "price": 450, "qty": -1 }
+        { "name": "미네(아이돌)의 엘레프", "img": "2D/Item_Icon_SecretStone_CH0275.webp", "price": 200, "qty": 5 },
+        { "name": "미네(아이돌)의 엘레프", "img": "2D/Item_Icon_SecretStone_CH0275.webp", "price": 250, "qty": 5 },
+        { "name": "미네(아이돌)의 엘레프", "img": "2D/Item_Icon_SecretStone_CH0275.webp", "price": 300, "qty": 5 },
+        { "name": "미네(아이돌)의 엘레프", "img": "2D/Item_Icon_SecretStone_CH0275.webp", "price": 350, "qty": 5 },
+        { "name": "미네(아이돌)의 엘레프\n(무제한)", "img": "2D/Item_Icon_SecretStone_CH0275.webp", "price": 450, "qty": -1 }
     ]
 ],
   "stageConfig": [
