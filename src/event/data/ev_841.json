@@ -1,7 +1,7 @@
 {
   "eventSettings": {
     "currencyIcons": [
-      "Texture2D/80px/80px-Item_Icon_Event_Item_0.webp",
+      "2D/Item_Icon_Event_Item_0.webp",
       "event/data/841/Item_Icon_Event_Token_1_S43.webp",
       "event/data/841/Item_Icon_Event_Token_2_S43.webp",
       "event/data/841/Item_Icon_Event_Token_3_S43.webp"
@@ -54,31 +54,92 @@
     "disk0": "Texture2D/80px/80px-Equipment_Icon_Exp_0.webp"
   },
   "shopConfig": [
+    
     [
-      { "name": "아이템이름s", "img": "event/data/841/Item_Icon_Event_Token_1_S43.webp", "price": 1, "qty": -1 }
+        { "name": "초급 활동 보고서", "img": "2D/skillbook/Item_Icon_ExpItem_0.png", "price": 1, "qty": 90 },
+        { "name": "일반 활동 보고서", "img": "2D/skillbook/Item_Icon_ExpItem_1.png", "price": 3, "qty": 95 },
+        { "name": "상급 활동 보고서", "img": "2D/skillbook/Item_Icon_ExpItem_2.png", "price": 12, "qty": 30 },
+        { "name": "최상급 활동 보고서", "img": "2D/skillbook/Item_Icon_ExpItem_3.png", "price": 60, "qty": 12 },
+        { "name": "기초 전술 교육 BD\n(트리니티)", "img": "2D/skillbook/Item_Icon_Material_ExSkill_Trinity_0.webp", "price": 10, "qty": 35 },
+        { "name": "일반 전술 교육 BD\n(트리니티)", "img": "2D/skillbook/Item_Icon_Material_ExSkill_Trinity_1.webp", "price": 30, "qty": 30 },
+        { "name": "상급 전술 교육 BD\n(트리니티)", "img": "2D/skillbook/Item_Icon_Material_ExSkill_Trinity_2.webp", "price": 100, "qty": 25 },
+        { "name": "최상급 전술 교육 BD\n(트리니티)", "img": "2D/skillbook/Item_Icon_Material_ExSkill_Trinity_3.webp", "price": 250, "qty": 7 },
+        { "name": "로마 12면체 조각", "img": "2D/opatsu/Item_Icon_Material_RomanDice_0.webp", "price": 5, "qty": 150 },
+        { "name": "파손된 로마 12면체", "img": "2D/opatsu/Item_Icon_Material_RomanDice_1.webp", "price": 15, "qty": 60 },
+        { "name": "수리된 로마 12면체", "img": "2D/opatsu/Item_Icon_Material_RomanDice_2.webp", "price": 50, "qty": 32 },
+        { "name": "온전한 로마 12면체", "img": "2D/opatsu/Item_Icon_Material_RomanDice_3.webp", "price": 150, "qty": 15 },
+        { "name": "귀여운 식기 세트", "img": "2D/favor/Item_Icon_Favor_24.webp", "price": 200, "qty": 10 },
+        { "name": "자수 손수건", "img": "2D/favor/Item_Icon_Favor_31.webp", "price": 200, "qty": 10 },
+        { "name": "재봉 세트", "img": "2D/favor/Item_Icon_Favor_Lv2_9.webp", "price": 300, "qty": 1 },
+        { "name": "화려한 펜라이트\n(재화 교환)", "img": "event/data/841/Item_Icon_Event_Token_2_S43.webp", "price": 5, "qty": -1 }
     ],
+
+    
     [
-      { "name": "아이템이름", "img": "아이템_이미지.webp", "price": 1, "qty": 0 }
+        { "name": "하급 강화석", "img": "2D/Equipment_Icon_Exp_0.png", "price": 1, "qty": 180 },
+        { "name": "일반 강화석", "img": "2D/Equipment_Icon_Exp_1.png", "price": 4, "qty": 95 },
+        { "name": "상급 강화석", "img": "2D/Equipment_Icon_Exp_2.png", "price": 15, "qty": 30 },
+        { "name": "최상급 강화석", "img": "2D/Equipment_Icon_Exp_3.png", "price": 60, "qty": 12 },
+        { "name": "기초 기술 노트\n(트리니티)", "img": "2D/skillbook/Item_Icon_SkillBook_Trinity_0.webp", "price": 5, "qty": 40 },
+        { "name": "일반 기술 노트\n(트리니티)", "img": "2D/skillbook/Item_Icon_SkillBook_Trinity_1.webp", "price": 15, "qty": 30 },
+        { "name": "상급 기술 노트\n(트리니티)", "img": "2D/skillbook/Item_Icon_SkillBook_Trinity_2.webp", "price": 50, "qty": 20 },
+        { "name": "최상급 기술 노트\n(트리니티)", "img": "2D/skillbook/Item_Icon_SkillBook_Trinity_3.webp", "price": 150, "qty": 12 },
+        { "name": "아틀란티스 메달 조각", "img": "2D/opatsu/Item_Icon_Material_AtlantisMedal_0.webp", "price": 5, "qty": 150 },
+        { "name": "파손된 아틀란티스 메달", "img": "2D/opatsu/Item_Icon_Material_AtlantisMedal_1.webp", "price": 15, "qty": 60 },
+        { "name": "마모된 아틀란티스 메달", "img": "2D/opatsu/Item_Icon_Material_AtlantisMedal_2.webp", "price": 50, "qty": 32 },
+        { "name": "온전한 아틀란티스 메달", "img": "2D/opatsu/Item_Icon_Material_AtlantisMedal_3.webp", "price": 150, "qty": 15 },
+        { "name": "건강 보조제", "img": "2D/favor/Item_Icon_Favor_33.webp", "price": 200, "qty": 10 },
+        { "name": "코스프레 뱅뱅이 안경", "img": "2D/favor/Item_Icon_Favor_18.webp", "price": 200, "qty": 10 },
+        { "name": "밀푀유 전통 파르페", "img": "2D/favor/Item_Icon_Favor_Lv2_4.webp", "price": 300, "qty": 1 },
+        { "name": "가구: 라이브 스테이지", "img": "2D/My_Event073_Idolstage.webp", "price": 2000, "qty": 1 },
+        { "name": "쁘띠 케이크\n(재화 교환)", "img": "event/data/841/Item_Icon_Event_Token_3_S43.webp", "price": 5, "qty": -1 }
     ],
+
+    
     [
-      { "name": "아이템이름", "img": "아이템_이미지.webp", "price": 0, "qty": 0 }
+        { "name": "500K 크레딧", "img": "ui/Item_Icon_SecretStone.webp", "price": 250, "qty": 2 },
+        { "name": "200K 크레딧", "img": "ui/Item_Icon_SecretStone.webp", "price": 100, "qty": 5 },
+        { "name": "100K 크레딧", "img": "ui/Item_Icon_SecretStone.webp", "price": 50, "qty": 5 },
+        { "name": "50K 크레딧", "img": "ui/Item_Icon_SecretStone.webp", "price": 25, "qty": 5 },
+        { "name": "로홍크 사본 쪽", "img": "2D/opatsu/Item_Icon_Material_Rohonc_0.webp", "price": 5, "qty": 150 },
+        { "name": "파손된 로홍크 사본", "img": "2D/opatsu/Item_Icon_Material_Rohonc_0.webp", "price": 15, "qty": 60 },
+        { "name": "주해된 로홍크 사본", "img": "2D/opatsu/Item_Icon_Material_Rohonc_0.webp", "price": 50, "qty": 32 },
+        { "name": "온전한 로홍크 사본", "img": "2D/opatsu/Item_Icon_Material_Rohonc_0.webp", "price": 150, "qty": 15 },
+        { "name": "만드라고라 씨앗", "img": "2D/opatsu/Item_Icon_Material_Mandragora_0.webp", "price": 5, "qty": 150 },
+        { "name": "만드라고라 새싹", "img": "2D/opatsu/Item_Icon_Material_Mandragora_1.webp", "price": 15, "qty": 60 },
+        { "name": "만드라고라 주스", "img": "2D/opatsu/Item_Icon_Material_Mandragora_2.webp", "price": 50, "qty": 32 },
+        { "name": "만드라고라 농축액", "img": "2D/opatsu/Item_Icon_Material_Mandragora_3.webp", "price": 150, "qty": 15 },
+        { "name": "웨이브캣 베개", "img": "2D/favor/Item_Icon_Favor_0.webp", "price": 200, "qty": 10 },
+        { "name": "리본이 달린 곰인형", "img": "2D/favor/Item_Icon_Favor_20.webp", "price": 200, "qty": 10 },
+        { "name": "세련된 빗", "img": "2D/favor/Item_Icon_Favor_Lv2_6.webp", "price": 300, "qty": 1 },
+        { "name": "크레딧\n5K", "img": "ui/Item_Icon_SecretStone.webp", "price": 5, "qty": -1 }
     ],
+
+    
     [
-      { "name": "아이템이름", "img": "아이템_이미지.webp", "price": 0, "qty": 0 }
+        { "name": "청휘석 600개", "img": "", "price": 1500, "qty": 2 },
+        { "name": "엘리그마 5개", "img": "ui/Item_Icon_SecretStone.webp", "price": 300, "qty": 10 },
+        { "name": "비의서", "img": "", "price": 2000, "qty": 1 },
+        { "name": "500K 크레딧", "img": "ui/Item_Icon_SecretStone.webp", "price": 250, "qty": 6 },
+        { "name": "미네(아이돌)의 엘레프", "img": "2D/Item_Icon_SecretStone_CH0275.webp", "price": 200, "qty": 5 },
+        { "name": "미네(아이돌)의 엘레프", "img": "2D/Item_Icon_SecretStone_CH0275.webp", "price": 250, "qty": 5 },
+        { "name": "미네(아이돌)의 엘레프", "img": "2D/Item_Icon_SecretStone_CH0275.webp", "price": 300, "qty": 5 },
+        { "name": "미네(아이돌)의 엘레프", "img": "2D/Item_Icon_SecretStone_CH0275.webp", "price": 350, "qty": 5 },
+        { "name": "미네(아이돌)의 엘레프\n(무제한)", "img": "2D/Item_Icon_SecretStone_CH0275.webp", "price": 450, "qty": -1 }
     ]
-  ],
+],
   "stageConfig": [
-    { "name": "01 ", "ap": 10, "drops": [9, 11, 0, null] },
-    { "name": "02 ", "ap": 20, "drops": [9, 0, 11, null] },
-    { "name": "03 ", "ap": 30, "drops": [9, 0, 0, 11] },
-    { "name": "04 ", "ap": 40, "drops": [17, 1, 1, 1] },
-    { "name": "05 ", "ap": 50, "drops": [6, 24, 0, null] },
-    { "name": "06 ", "ap": 60, "drops": [6, 0, 24, null] },
-    { "name": "07 ", "ap": 70, "drops": [6, 0, 0, 24] },
-    { "name": "08 ", "ap": 80, "drops": [27, 1, 1, 1] },
-    { "name": "09 ", "ap": 90, "drops": [3, 37, 0, null] },
-    { "name": "10 ", "ap": 100, "drops": [3, 0, 37, null] },
-    { "name": "11 ", "ap": 110, "drops": [3, 0, 0, 37] },
-    { "name": "12 ", "ap": 120, "drops": [40, 0, 0, null] }
+    { "name": "01 본관 A-11동 입구", "ap": 10, "drops": [9, 11, 0, null] },
+    { "name": "02 본관 A-11동 출구", "ap": 20, "drops": [9, 0, 11, null] },
+    { "name": "03 9번 임시 동관 입구", "ap": 30, "drops": [9, 0, 0, 11] },
+    { "name": "04 9번 임시 동관 출구", "ap": 40, "drops": [17, 1, 1, 1] },
+    { "name": "05 9번 임시 서관 입구", "ap": 50, "drops": [6, 24, 0, null] },
+    { "name": "06 9번 임시 서관 출구", "ap": 60, "drops": [6, 0, 24, null] },
+    { "name": "07 점거 당한 31 별관 입구", "ap": 70, "drops": [6, 0, 0, 24] },
+    { "name": "08 점거 당한 31 별관 중앙", "ap": 80, "drops": [27, 1, 1, 1] },
+    { "name": "09 점거 당한 31 별관 출구", "ap": 90, "drops": [3, 37, 0, null] },
+    { "name": "10 잊힌 4별관 입구", "ap": 100, "drops": [3, 0, 37, null] },
+    { "name": "11 잊힌 외곽 4별관 출구", "ap": 110, "drops": [3, 0, 0, 37] },
+    { "name": "12 버려진 임시 남관", "ap": 120, "drops": [40, 0, 0, null] }
   ]
 }

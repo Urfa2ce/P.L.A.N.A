@@ -2,17 +2,44 @@
 import { state } from './store.js';
 import { initTabs, initShop, initStageFilters, initAcademyFilter, initStudentBonus, initDropTable, updateBonusDashboardIcons, switchTab, toggleStudent, toggleApWidget, toggleAllStages, syncValues, updateTotal, manualTarget, updateCurrent, toggleStudentSelector, toggleBonusFilter, toggleRoleFilter } from './ui.js';
 import { calculate, calcAp, updateTotalBonus } from './calc.js';
+import { modifyQty, checkInput } from './ui.js'; // import 목록에 추가 필요!
 
 // [NEW] 날짜 비교 유틸리티 함수
-function getEventStatus(start, end) {
-    if (!start || !end) return 'ing'; // 날짜 없으면 기본 진행중 처리
-    const now = new Date();
-    const sDate = new Date(start);
-    const eDate = new Date(end);
+// [js/main.js] 맨 위 또는 해당 함수 위치에 덮어쓰기
 
-    if (now >= sDate && now < eDate) return 'ing'; // 진행중
-    if (now >= eDate) return 'end';               // 종료됨
-    return 'ready';                               // 시작 전 (예정)
+
+// 한국 시간(KST) 강제 고정 날짜 비교 함수
+function getEventStatus(start, end) {
+    if (!start || !end) return 'ing'; 
+
+    // 1. 현재 시간 구하기 (간소화됨)
+    const now = new Date();
+    
+    // now.getTime()은 타임존 무관하게 항상 UTC 표준시를 가져옴
+    // 여기에 KST 시차인 9시간(밀리초)만 더해주면 됨
+    const kstOffset = 9 * 60 * 60 * 1000; 
+    const kstDate = new Date(now.getTime() + kstOffset);
+    
+    // toISOString()은 UTC 기준 시간을 찍어주므로, 
+    // 위에서 강제로 9시간을 더한 값을 찍으면 문자열상으로는 한국 시간이 나옴
+    const currentKST = kstDate.toISOString().split('.')[0]; 
+
+    // 2. JSON 날짜 포맷 통일 (' ' -> 'T')
+    let sDate = start.replace(' ', 'T');
+    let eDate = end.replace(' ', 'T');
+
+    // 시간 없이 날짜만 있는 경우 처리
+    if (sDate.length <= 10) sDate += 'T00:00:00';
+    if (eDate.length <= 10) eDate += 'T23:59:59';
+
+    console.log(`현재(KST): ${currentKST} / 종료일: ${eDate}`); // 디버깅용 로그
+
+    // 3. 문자열 비교
+    // 종료 시간이 현재 시간보다 작거나 같으면 종료 처리
+    if (currentKST >= eDate) return 'end';
+    if (currentKST >= sDate && currentKST < eDate) return 'ing';
+    
+    return 'ready';
 }
 
 function getStatusText(status) {
@@ -206,7 +233,8 @@ window.toggleStudent = toggleStudent;
 window.manualTarget = manualTarget;
 window.updateCurrent = updateCurrent;
 window.calculate = calculate;
-window.syncValues = syncValues;
+window.modifyQty = modifyQty;
+window.checkInput = checkInput;
 window.updateTotal = updateTotal;
 window.toggleAllStages = toggleAllStages;
 window.filterByAcademy = (ac) => { state.currentAcademy = ac; initStudentBonus(); };

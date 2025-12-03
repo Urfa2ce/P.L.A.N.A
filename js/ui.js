@@ -163,37 +163,62 @@ export function initTabs() {
 }
 
 // 4. 상점 생성 (4개까지 확장)
+// ui.js - initShop 함수
+
 export function initShop() { 
     const c = document.getElementById('shop-container'); c.innerHTML = '';
     
-    // [수정] 4개까지 확인 (i < 4)
     for(let i=0; i<4; i++) {
-        if (!state.shopConfig[i]) continue; // 데이터 없으면 패스
+        if (!state.shopConfig[i]) continue;
 
         const sec = document.createElement('div'); 
         sec.className = `shop-section ${i===0?'active':''}`; 
         sec.id = `section-${i}`;
         
         (state.shopConfig[i]||[]).forEach(d => {
-            const card = document.createElement('div'); card.className = `item-card ${d.qty===0?'disabled':''}`;
+            const card = document.createElement('div'); 
+            card.className = `item-card ${d.qty===0?'disabled':''}`;
             const img = d.img ? IMG_PATH+d.img : DEFAULT_IMG;
+            
+            // 무제한이면 무한대 기호, 아니면 남은 횟수
             const badge = d.qty===-1 ? 'limit-badge unlimited' : 'limit-badge';
             const bText = d.qty===-1 ? '구매제한: ∞' : `구매제한: ${d.qty}회`;
-            const max = d.qty===-1 ? 99 : d.qty;
             
+            // ★ 최대값 설정: 무제한이면 9999, 아니면 해당 수량
+            const maxVal = d.qty === -1 ? 9999 : d.qty;
+
             card.innerHTML = `
                 <input type="checkbox" class="item-checkbox" onchange="updateTotal(${i})">
-                <div class="card-top"><span class="item-name">${d.name}</span>
-                <div class="img-box"><img src="${img}"></div><span class="${badge}">${bText}</span>
-                <div class="price-tag">Cost <strong>${d.price}</strong></div></div>
+                
+                <div class="card-top">
+                    <span class="item-name">${d.name}</span>
+                    <div class="img-box"><img src="${img}"></div>
+                    <span class="${badge}">${bText}</span>
+                    <div class="price-tag">가격 <strong>${d.price}</strong></div>
+                </div>
+                
                 <input type="hidden" class="cost-input" value="${d.price}">
-                <div class="control-row"><input type="range" class="range-input" min="0" max="${max}" value="0" oninput="syncValues(this,'range',${i})">
-                <input type="number" class="qty-input-sm" min="0" max="${max}" value="0" oninput="syncValues(this,'num',${i})"></div>
+                
+                <div class="control-row stepper-box">
+                    <button class="step-btn" onclick="modifyQty(this, 'min', ${i})">≪</button>
+                    <button class="step-btn" onclick="modifyQty(this, -1, ${i})">＜</button>
+                    
+                    <input type="number" class="qty-input-main" 
+                           min="0" max="${maxVal}" value="0" 
+                           oninput="checkInput(this, ${i})"
+                           onfocus="this.select()">
+                           
+                    <button class="step-btn" onclick="modifyQty(this, 1, ${i})">＞</button>
+                    <button class="step-btn" onclick="modifyQty(this, 'max', ${i})">≫</button>
+                </div>
             `;
-            card.addEventListener('click', (e)=>{ if(e.target.tagName!=='INPUT'){
+
+            // 카드 바탕 클릭 시 체크박스 토글 기능 (입력창/버튼 클릭 제외)
+            card.addEventListener('click', (e)=>{ 
+                if(['INPUT', 'BUTTON'].includes(e.target.tagName)) return;
                 const chk = card.querySelector('.item-checkbox'); 
                 if(!chk.disabled){ chk.checked=!chk.checked; updateTotal(i); }
-            }});
+            });
             sec.appendChild(card);
         });
         c.appendChild(sec);
@@ -226,16 +251,36 @@ export function syncValues(el, type, sIdx) {
 }
 
 export function updateTotal(sIdx) {
-    const sec = document.getElementById(`section-${sIdx}`); let sum = 0;
+    const sec = document.getElementById(`section-${sIdx}`); 
+    let sum = 0;
+    
     sec.querySelectorAll('.item-card').forEach(c => {
+        // 체크박스가 켜진 아이템만 계산
         if(c.querySelector('.item-checkbox').checked) {
-            sum += (parseInt(c.querySelector('.cost-input').value)||0) * (parseInt(c.querySelector('.qty-input-sm').value)||0);
+            const cost = parseInt(c.querySelector('.cost-input').value) || 0;
+            
+            // [핵심 수정] 클래스명 변경: qty-input-sm -> qty-input-main
+            // 예전 코드: c.querySelector('.qty-input-sm').value
+            const qtyInput = c.querySelector('.qty-input-main'); 
+            const qty = qtyInput ? (parseInt(qtyInput.value) || 0) : 0;
+            
+            sum += cost * qty;
             c.classList.add('selected');
-        } else c.classList.remove('selected');
+        } else {
+            c.classList.remove('selected');
+        }
     });
+    
+    // 상태 저장
     state.tabTotals[sIdx] = sum;
-    if(state.currentTab===sIdx) document.getElementById('targetAmount').value = sum;
-    calculate();
+    
+    // 현재 보고 있는 탭이면 하단 '필요 재화' 칸 즉시 업데이트
+    if(state.currentTab === sIdx) {
+        const targetEl = document.getElementById('targetAmount');
+        if(targetEl) targetEl.value = sum;
+    }
+    
+    calculate(); // 전체 계산 다시 실행
 }
 
 // [수정] 탭 전환 시 보너스 입력창 값 갱신
@@ -261,100 +306,99 @@ export function toggleApWidget() {
     else { p.classList.add('hidden'); b.style.display='flex'; }
 }
 
+// ui.js - displayResult 함수
+
 export function displayResult(results, surplusArray) {
     const nameEl = document.getElementById('recStageName');
     const infoEl = document.getElementById('recStageInfo');
-    const runsEl = document.getElementById('result-runs');
-    const apEl = document.getElementById('result-ap');
-    let surEl = document.getElementById('result-surplus');
+    const surEl = document.getElementById('result-surplus');
+    
+    // 1. 현재 설정된 목표 총합 계산 (초기 상태인지 판별용)
+    const totalTarget = state.tabTotals.reduce((a, b) => a + b, 0);
 
-    if (!surEl) {
-        const box = document.querySelector('.result-box');
-        if(box) {
-            surEl = document.createElement('div');
-            surEl.id = 'result-surplus';
-            surEl.className = 'res-surplus-sm';
-            surEl.style.marginTop = '10px';
-            surEl.style.fontSize = '0.85rem';
-            surEl.style.color = '#ffaa00';
-            box.appendChild(surEl);
-        }
-    }
-
+    // 2. 결과가 없거나(0회) 조건 불충분일 때 처리
     if (!results || results.length === 0) {
-        if(results === null) {
-             nameEl.innerText = "추천 불가 (필터 확인)";
-             nameEl.style.color = "#FF5555";
-        } else {
-             nameEl.innerText = "목표 달성 완료";
-             nameEl.style.color = "#128CFF";
+        if (results === null) {
+            // 필터링 등으로 계산 불가능한 경우
+            nameEl.innerText = "조건 불충분";
+            nameEl.style.color = "#ff6b6b"; 
+            infoEl.innerHTML = `<div class="rec-message">필터를 확인하거나 목표를 설정해주세요.</div>`;
+        } 
+        else if (totalTarget === 0) {
+            // ★ 수정됨: 목표가 0이면 '계산 대기 중' 표시
+            nameEl.innerText = "계산 대기 중...";
+            nameEl.style.color = "#aaa"; // 회색 (중립적)
+            infoEl.innerHTML = `<div class="rec-message">필요 재화량을 입력하면<br>최적의 스테이지를 추천해 드립니다.</div>`;
         }
-        infoEl.innerText = "-";
-        runsEl.innerText = "-";
-        apEl.innerText = "0";
-        if(surEl) surEl.innerHTML = "";
+        else {
+            // 목표는 있는데 이미 달성한 경우 (진짜 파밍 완료)
+            nameEl.innerText = "파밍 완료";
+            nameEl.style.color = "#4CAF50"; // 초록색 (긍정적)
+            infoEl.innerHTML = `<div class="rec-message" style="color:#4CAF50; font-weight:bold;">🎉 이미 목표를 달성했습니다!</div>`;
+        }
+        
+        if (surEl) {
+            surEl.innerHTML = "";
+            surEl.style.marginBottom = "0";
+        }
         return;
     }
 
-    let totalAp = 0;
-    let totalRuns = 0;
-    
-    let listHtml = `<div style="display:flex; flex-direction:column; gap:8px; width:100%;">`;
+    // 3. (이하 동일) 결과가 있을 때 카드 리스트 출력
+    let listHtml = '';
     
     results.forEach(res => {
-        totalRuns += res.runCount;
-        totalAp += (res.runCount * res.ap);
-
         let dropIcons = '';
         res.data.drops.forEach((base, idx) => {
-            if(base > 0 && state.currencyIcons[idx]) {
-                dropIcons += `<img src="${IMG_PATH + state.currencyIcons[idx]}" style="width:35px; margin-right:2px; vertical-align:middle;">`;
+            if (base > 0 && state.currencyIcons[idx]) {
+                dropIcons += `<img src="${IMG_PATH + state.currencyIcons[idx]}">`;
             }
         });
-
+        
         listHtml += `
-            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.05); padding:6px 10px; border-radius:4px;">
-                <div style="text-align:left;">
-                    <div style="font-weight:bold; font-size:0.95rem;">${res.data.name}</div>
-                    <div style="font-size:0.8rem; opacity:0.7;">${dropIcons}</div>
+            <div class="rec-card">
+                <div class="rec-card-left">
+                    <span class="rec-stage-name">${res.data.name}</span>
+                    <div class="rec-drop-icons">${dropIcons}</div>
                 </div>
-                <div style="text-align:right;">
-                    <div style="color:#128CFF; font-weight:bold;">${res.runCount}회</div>
-                    <div style="font-size:0.8rem; color:#aaa;">${(res.runCount * res.ap).toLocaleString()} AP</div>
+                <div class="rec-card-right">
+                    <span class="rec-run-count">${res.runCount}회</span>
+                    <span class="rec-ap-cost">${(res.runCount * res.ap).toLocaleString()} AP</span>
                 </div>
             </div>
         `;
     });
-    listHtml += `</div>`;
 
-    nameEl.innerText = "추천 파밍 스테이지";
-    nameEl.style.color = "#2c2c2cff";
-    infoEl.style.justifyContent = 'normal'; 
-    infoEl.innerHTML = listHtml;
-    runsEl.innerText = `총 ${totalRuns}회`;
-    apEl.innerHTML = `
-        <div style="display:flex; align-items:center; justify-content:center; gap:4px; color:#ffdd55;">
-            <img src="${AP_ICON_PATH}" style="width:16px; height:16px; object-fit:contain;">
-            <span>${totalAp.toLocaleString()}</span>
-        </div>
-    `;
+    nameEl.innerText = "추천 파밍 목록";
+    nameEl.style.fontsize = "1.0.rem";
+    nameEl.style.color = "#333";
+    nameEl.style.marginBottom = "5px";
 
+    infoEl.innerHTML = listHtml;       
+    
+    // 남는 재화 표시
     let surplusHtml = [];
-    if(surplusArray) {
+    if (surplusArray) {
         surplusArray.forEach((amt, idx) => {
-            if(amt > 0) {
-                 const displayIdx = state.tabDisplayMap[idx];
-                 const icon = (state.currencyIcons[displayIdx]) ? IMG_PATH + state.currencyIcons[displayIdx] : DEFAULT_IMG;
-                 surplusHtml.push(`<span style="margin-right:8px;"><img src="${icon}" style="width:12px; vertical-align:middle"> +${amt}</span>`);
+            if (amt > 0) {
+                const displayIdx = state.tabDisplayMap[idx];
+                const icon = (state.currencyIcons[displayIdx]) ? IMG_PATH + state.currencyIcons[displayIdx] : DEFAULT_IMG;
+                surplusHtml.push(`
+                    <span style="margin-right:10px; color:#ffcc00; font-size:0.85rem; display:inline-flex; align-items:center;">
+                        <img src="${icon}" style="width:14px; margin-right:3px; vertical-align:middle"> +${amt}
+                    </span>
+                `);
             }
         });
     }
 
-    if(surEl) {
-        if(surplusHtml.length > 0) {
+    if (surEl) {
+        if (surplusHtml.length > 0) {
             surEl.innerHTML = `⚠️ 남는 재화: ` + surplusHtml.join('');
+            surEl.style.marginBottom = "8px";
         } else {
-            surEl.innerHTML = `<span style="color:#66cc66">딱코!</span>`;
+            surEl.innerHTML = "";
+            surEl.style.marginBottom = "0";
         }
     }
 }
@@ -363,7 +407,25 @@ export function initDropTable() {
     const container = document.getElementById('drop-table-list');
     if (!container) return;
     container.innerHTML = '';
-    const bonusVal = parseInt(document.getElementById('bonusRate').value) || 0;
+
+    // [삭제됨] 더 이상 존재하지 않는 bonusRate 엘리먼트 참조 제거
+    // const bonusVal = parseInt(document.getElementById('bonusRate').value) || 0; 
+
+    // 1. 학생 보너스 값 미리 계산 (calculate 함수와 동일 로직)
+    let studentBonuses = [0, 0, 0, 0];
+    for(let i=0; i<4; i++) {
+        let strikers = [];
+        let specials = [];
+        state.selectedStudents.forEach(idx => {
+            const s = state.studentData[idx];
+            if(s) {
+                let val = Array.isArray(s.bonus) ? (s.bonus[i] || 0) : (s.bonus || 0);
+                if (s.role === 'SPECIAL') specials.push(val); else strikers.push(val);
+            }
+        });
+        strikers.sort((a,b)=>b-a); specials.sort((a,b)=>b-a);
+        studentBonuses[i] = strikers.slice(0,4).reduce((a,b)=>a+b,0) + specials.slice(0,2).reduce((a,b)=>a+b,0);
+    }
     
     state.stageConfig.forEach(stage => {
         const row = document.createElement('div');
@@ -371,10 +433,33 @@ export function initDropTable() {
         let html = '';
         
         if(stage.drops) {
-            stage.drops.forEach((base, i) => {
+            stage.drops.forEach((base, dIdx) => {
                 if(base > 0) {
-                    const icon = (state.currencyIcons[i]) ? IMG_PATH+state.currencyIcons[i] : DEFAULT_IMG;
-                    const bonusAmt = Math.ceil(base * (bonusVal/100));
+                    const icon = (state.currencyIcons[dIdx]) ? IMG_PATH+state.currencyIcons[dIdx] : DEFAULT_IMG;
+                    
+                    // [핵심 수정] 재화별 개별 보너스 적용 로직
+                    let finalBonus = 0;
+
+                    // 1) 대시보드(manual inputs) 매핑 확인
+                    const dashboardIdx = state.bonusDashboardIcons.indexOf(dIdx);
+                    let manualVal = 0;
+                    
+                    if (dashboardIdx !== -1) {
+                        const inputEl = document.getElementById(`bd-manual-${dashboardIdx}`);
+                        if (inputEl && inputEl.value !== '') {
+                            manualVal = parseInt(inputEl.value);
+                        }
+                    }
+
+                    // 2) 우선순위: 수동 > 학생
+                    if (!isNaN(manualVal) && manualVal > 0) {
+                        finalBonus = manualVal;
+                    } else {
+                        finalBonus = studentBonuses[dIdx] || 0;
+                    }
+
+                    // 3) 보너스 수량 계산
+                    const bonusAmt = Math.ceil(base * (finalBonus/100));
                     
                     html += `
                         <div class="drop-badge">
@@ -408,4 +493,77 @@ export function initDropTable() {
         `;
         container.appendChild(row);
     });
+}
+
+// ui.js - 하단에 추가
+
+// 버튼 클릭 처리 함수 (<<, <, >, >>)
+export function modifyQty(btn, action, sIdx) {
+    const parent = btn.closest('.stepper-box');
+    const input = parent.querySelector('.qty-input-main');
+    const max = parseInt(input.max) || 9999;
+    let current = parseInt(input.value) || 0;
+
+    let newVal = current;
+
+    if (action === 'min') {
+        newVal = 0; // 최소값 (0)
+    } else if (action === 'max') {
+        newVal = max; // 최대값 (Full)
+    } else {
+        // 숫자 덧셈/뺄셈
+        newVal += action;
+    }
+
+    // 범위 제한 (0 ~ max)
+    if (newVal < 0) newVal = 0;
+    if (newVal > max) newVal = max;
+
+    input.value = newVal;
+    
+    // 값 변경에 따른 체크박스 및 합계 업데이트 로직 호출
+    reflectChange(input, sIdx);
+}
+
+// 직접 입력 시 유효성 검사 함수
+export function checkInput(input, sIdx) {
+    const max = parseInt(input.max) || 9999;
+    let val = parseInt(input.value);
+
+    // 비어있거나 이상한 값이면 0 처리하지 않고 그대로 두되 계산은 0으로
+    if (isNaN(val)) val = 0;
+
+    // 최대값 초과 방지
+    if (val > max) {
+        val = max;
+        input.value = max;
+    }
+    // 음수 방지
+    if (val < 0) {
+        val = 0;
+        input.value = 0;
+    }
+
+    reflectChange(input, sIdx);
+}
+
+// (내부용) 값 변경 후 체크박스 상태 동기화 및 합계 갱신
+function reflectChange(input, sIdx) {
+    const card = input.closest('.item-card');
+    const chk = card.querySelector('.item-checkbox');
+    const val = parseInt(input.value) || 0;
+
+    // 수량이 1 이상이면 자동으로 체크박스 ON
+    if (val > 0 && !chk.disabled) {
+        chk.checked = true;
+        card.classList.add('selected');
+    } 
+    // 수량이 0이면 체크박스 OFF
+    else if (val === 0) {
+        chk.checked = false;
+        card.classList.remove('selected');
+    }
+
+    // 전체 합계 재계산
+    updateTotal(sIdx);
 }

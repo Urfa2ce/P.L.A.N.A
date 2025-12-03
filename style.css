@@ -1058,26 +1058,94 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
     contain: content; /* 브라우저에게 이 박스 크기가 외부 영향을 안 받는다고 힌트 줌 */
 }
 /* ==========================================================================
-   [NEW] 사이드바 레이아웃
+   [최종 보정] 반응형 레이아웃
+   : 화면 너비에 따라 '왼쪽 고정' vs '나란히 배치' 자동 전환
    ========================================================================== */
+
+/* 1. 전체 틀 (Wrapper) - 기본: 아주 넓은 화면용 */
 .app-wrapper {
-    display: flex;
-    gap: 20px;
-    align-items: flex-start;
-    justify-content: center;
-    max-width: 1400px;
-    margin: 0 auto;
+    position: relative; /* 사이드바 절대 위치 기준 */
     width: 100%;
+    max-width: 100%;    /* 전체 너비 사용 */
+    margin: 0 auto;
+    padding: 20px;
+    
+    /* 기본적으로 Flex를 쓰지만, 넓은 화면에선 absolute 사이드바가 뜸 */
+    display: flex;
+    justify-content: center; 
+    align-items: flex-start;
+    min-height: 100vh;
 }
 
+/* 2. 사이드바 (이벤트 리스트) - 기본: 왼쪽 구석 고정 */
 .sidebar {
-    width: 250px;
-    flex-shrink: 0;
-    position: sticky;
+    position: absolute;  /* 공중에 띄움 */
+    left: 20px;          /* 왼쪽 벽 고정 */
     top: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+    width: 260px;
+    z-index: 10;
+}
+
+/* 3. 계산기 메인 (Container) - 기본: 정중앙 */
+.container {
+    width: 100%;
+    max-width: 1100px;   /* 1100px 크기 유지 */
+    margin: 0 auto;      /* 정중앙 정렬 */
+    position: relative;
+    z-index: 1;
+}
+
+/* ==========================================================================
+   화면 크기별 예외 처리 (덮어쓰기 방지)
+   ========================================================================== */
+
+/* [핵심 수정] 화면이 1700px 이하일 때 (노트북, 일반 데스크탑) */
+/* 계산 공간(1100px) + 사이드바 공간(300px) + 여백 확보가 안 되면 모드 전환 */
+@media (max-width: 1700px) {
+    .app-wrapper {
+        /* 사이드바와 계산기를 나란히 배치하고, 전체를 중앙 정렬 */
+        justify-content: center; 
+        gap: 30px; /* 사이 간격 */
+    }
+
+    .sidebar {
+        /* 절대 위치 해제 -> 계산기 옆으로 내려와서 자리를 잡음 */
+        position: sticky; 
+        left: auto;
+        top: 20px;
+        height: fit-content; /* 내용물만큼만 높이 차지 */
+        margin-right: 0;
+    }
+
+    .container {
+        /* 마진 오토 해제 (Flex 흐름에 따름) */
+        margin: 0; 
+        /* 계산기 크기가 화면보다 크지 않게 조절 */
+        max-width: 1100px; 
+        flex: 1; /* 남은 공간 적절히 차지 */
+        min-width: 0; /* 찌그러짐 방지 */
+    }
+}
+
+/* 태블릿/모바일 (1100px 이하) - 위아래 배치 */
+@media (max-width: 1100px) {
+    .app-wrapper {
+        flex-direction: column; /* 세로 배치 */
+        align-items: center;
+    }
+    
+    .sidebar {
+        position: static;
+        width: 100%;
+        max-width: 600px;
+        margin-bottom: 20px;
+        order: -1; /* 사이드바를 위로 */
+    }
+    
+    .container {
+        width: 100%;
+        max-width: 100%;
+    }
 }
 
 /* style.css 에서 .banner-area 찾아서 position: relative; 한 줄 추가 */
@@ -1295,4 +1363,281 @@ text-shadow:
 .status-badge-overlay.ready {
     background-color: rgba(255, 140, 0, 0.9); /* 오렌지색 */
     color: white;
+}
+
+/* style.css 추가 */
+
+/* 버튼과 입력창을 감싸는 컨테이너 */
+.stepper-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* 양끝 정렬하되 */
+    gap: 2px; /* 간격을 4px -> 2px로 좁힘 */
+    margin-top: 8px;
+    width: 100%;
+    max-width: 100%; /* 부모 밖으로 나가는 것 방지 */
+}
+
+/* << < > >> 버튼 스타일 */
+.step-btn {
+    /* [핵심] 버튼 크기를 고정이 아니라 flex로 제어 */
+    flex: 0 0 28px; /* 기본 너비 28px, 절대 줄어들지 않음(찌그러짐 방지) */
+    width: 28px;    
+    height: 28px;   /* 높이도 살짝 줄임 (기존 32px) */
+    
+    border: 1px solid #ddd;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    font-weight: bold;
+    color: #555;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px; /* 폰트 사이즈 조절 */
+    padding: 0;      /* 내부 여백 제거 */
+    transition: all 0.2s;
+}
+
+.step-btn:active {
+    background-color: #ddd;
+    transform: scale(0.95);
+}
+
+/* 가운데 숫자 입력창 */
+.qty-input-main {
+    /* [핵심] 남은 공간을 입력창이 차지하도록 설정 */
+    flex: 1; 
+    
+    /* 너무 작아지거나 커지지 않게 제한 */
+    min-width: 30px; 
+    max-width: 60px;
+    
+    height: 28px; /* 버튼 높이와 맞춤 */
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: bold;
+    
+    /* 모바일 브라우저 기본 스타일 제거 */
+    -webkit-appearance: none; 
+    margin: 0;
+}
+
+/* 입력창 포커스 시 */
+.qty-input-main:focus {
+    outline: none;
+    border-color: #128CFF;
+}
+
+/* [추가] 화면이 아주 작을 때(모바일) 미세 조정 */
+@media (max-width: 400px) {
+    .step-btn {
+        flex: 0 0 24px; /* 버튼 크기를 24px로 더 줄임 */
+        width: 24px;
+        height: 24px;
+        font-size: 10px; /* 글자도 작게 */
+    }
+    
+    .qty-input-main {
+        height: 24px;
+        font-size: 12px;
+    }
+}
+
+/* 가운데 숫자 입력창 */
+.qty-input-main {
+    width: 60px; /* 너비 적절히 조절 */
+    height: 32px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* 입력창 포커스 시 */
+.qty-input-main:focus {
+    outline: none;
+    border-color: #128CFF;
+}
+
+/* 대시보드 내 수동 입력창 스타일 */
+.bd-manual-input {
+    width: 40px;
+    height: 18px;
+    font-size: 11px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(0, 0, 0, 0.2);
+    color: #fff;
+    border-radius: 4px;
+    margin-top: 2px;
+}
+
+.bd-manual-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 10px;
+}
+
+.bd-manual-input:focus {
+    outline: none;
+    border-color: #128CFF;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+/* bd-item의 정렬 보정 */
+.bd-item {
+    padding: 4px 2px; /* 내부 공간 확보 */
+}
+
+/* 통합된 추천 박스 스타일 */
+.unified-box {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 16px;
+}
+
+/* 상단 헤더 (이름 + 통계) */
+.rec-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+}
+
+.rec-stats-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.1rem;
+}
+
+.stat-runs {
+    color: #128CFF;
+    font-weight: bold;
+}
+
+.stat-ap {
+    color: #aaa;
+    font-size: 0.9rem;
+    font-weight: normal;
+}
+
+/* 남는 재화 표시 줄 */
+.rec-surplus-line {
+    font-size: 0.85rem;
+    min-height: 14px; /* 내용 없어도 공간 유지 방지 */
+}
+
+/* 모바일 대응 */
+@media (max-width: 400px) {
+    .rec-header-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    .rec-stats-group {
+        width: 100%;
+        justify-content: flex-end; /* 숫자는 오른쪽으로 */
+    }
+}
+
+/* 추천 스테이지 리스트 컨테이너 */
+.rec-info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* 카드 사이 간격 */
+    margin-top: 10px;
+}
+
+/* style.css 맨 아래에 덮어쓰기 */
+
+/* 추천 스테이지 리스트 컨테이너 */
+.rec-info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* 카드 사이 간격 */
+    margin-top: 10px;
+}
+
+/* ★ 4번째 사진 스타일: 흰색 카드 디자인 ★ */
+.rec-card {
+    background-color: #ffffff; /* 흰색 배경 */
+    border-radius: 12px;       /* 둥근 모서리 */
+    padding: 15px 20px;        /* 내부 여백 넉넉하게 */
+    
+    /* 배치 설정 */
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;       
+    
+    /* 그림자 및 테두리 */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+    border: 1px solid #f0f0f0; 
+}
+
+/* 왼쪽: 스테이지 번호 & 아이콘 */
+.rec-card-left {
+    display: flex;
+    flex-direction: column;
+    gap: 6px; /* 이름과 아이콘 사이 간격 */
+    align-items: flex-start;
+}
+
+.rec-stage-name {
+    font-size: 1.0rem;
+    font-weight: 600; /* 아주 굵게 */
+    color: #444;      /* 진한 회색 */
+    line-height: 1;
+}
+
+.rec-drop-icons {
+    display: flex;
+    align-items: center;
+}
+
+.rec-drop-icons img {
+    width: 26px;  /* 아이콘 크기 */
+    height: 26px;
+    margin-right: 5px;
+    object-fit: contain;
+}
+
+/* 오른쪽: 횟수 & AP */
+.rec-card-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; /* 오른쪽 정렬 */
+    gap: 2px;
+}
+
+.rec-run-count {
+    font-size: 1.0rem;
+    font-weight: 900;
+    color: #128CFF; /* 파란색 (사진과 동일) */
+    line-height: 1;
+}
+
+.rec-ap-cost {
+    font-size: 0.95rem;
+    color: #999; /* 연한 회색 */
+    font-weight: 500;
+}
+
+/* 상단 헤더 숨김 처리 (혹시 남아있을 요소 대비) */
+.rec-stats-group {
+    display: none !important;
+}
+
+/* 메시지 스타일 */
+.rec-message {
+    text-align: center;
+    padding: 20px;
+    color: #aaa;
+    font-size: 0.95rem;
 }

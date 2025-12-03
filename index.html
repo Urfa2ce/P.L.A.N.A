@@ -8,42 +8,19 @@
 </head>
 <body>
 
-<!-- <div class="ap-ios-wrapper">
-    <div id="apIconBtn" class="ap-ios-icon" onclick="toggleApWidget()" title="AP 계산기 열기">
-        <img src="src/ui/Currency_Icon_AP.png" alt="AP" onerror="this.style.display='none'">
-    </div>
-    <div id="apPopup" class="ap-ios-popup hidden">
-        <div class="ap-ios-header">
-            <span>AP 만땅 계산기</span>
-            <button class="close-btn-ios" onclick="toggleApWidget()">✕</button>
-        </div>
-        <div class="ap-ios-body">
-            <div class="ap-input-row">
-                <button class="ap-circle-btn" onclick="adjustAp(-1)">-</button>
-                <input type="number" id="curAp" placeholder="현재" oninput="calcAp()">
-                <button class="ap-circle-btn" onclick="adjustAp(1)">+</button>
-            </div>
-            <div class="ap-status-text">
-                <span class="slash">Max</span> <span class="max-ap-text">240</span>
-            </div>
-            <div id="apResult" class="ap-ios-result">입력 대기 중...</div>
-        </div>
-    </div>
-</div> -->
-
 <div class="app-wrapper">
 
     <aside class="sidebar">
-    <div class="banner-area" onclick="toggleEventListUI()"style="position: relative;">
-        <img src="" alt="Event Banner" onerror="this.style.display='none'">
+        <div class="banner-area" onclick="toggleEventListUI()" style="position: relative;">
+            <img src="" alt="Event Banner" onerror="this.style.display='none'">
+            
+            <span id="mainBannerBadge" class="status-badge-overlay" style="display:none;"></span>
+            <div class="banner-placeholder">EVENT LIST</div>
+        </div>
         
-        <span id="mainBannerBadge" class="status-badge-overlay" style="display:none;"></span>
-        <div class="banner-placeholder">EVENT LIST</div>
-    </div>
-    
-    <div id="eventListContainer" class="event-list-box hidden">
-    </div>
-</aside>
+        <div id="eventListContainer" class="event-list-box hidden">
+        </div>
+    </aside>
 
     <div class="container">
         <h1>이벤트 상점 계산기</h1>
@@ -58,37 +35,49 @@
      
             <div id="studentSelectorBox" class="student-selector-body hidden">
                 <div class="bonus-dashboard">
-    <div id="bd-item-0" class="bd-item" onclick="toggleBonusFilter(0)">
-        <div class="bd-icon-box">
-            <img id="bd-icon-0" src="" class="bd-icon" onerror="this.style.display='none'">
-        </div>
-        <span id="bd-val-0" class="bd-val">0%</span>
-    </div>
-    <div class="bd-line"></div>
-    
-    <div id="bd-item-1" class="bd-item" onclick="toggleBonusFilter(1)">
-        <div class="bd-icon-box">
-            <img id="bd-icon-1" src="" class="bd-icon" onerror="this.style.display='none'">
-        </div>
-        <span id="bd-val-1" class="bd-val">0%</span>
-    </div>
-    <div class="bd-line"></div>
-    
-    <div id="bd-item-2" class="bd-item" onclick="toggleBonusFilter(2)">
-        <div class="bd-icon-box">
-            <img id="bd-icon-2" src="" class="bd-icon" onerror="this.style.display='none'">
-        </div>
-        <span id="bd-val-2" class="bd-val">0%</span>
-    </div>
+                    <div id="bd-item-0" class="bd-item" onclick="toggleBonusFilter(0)">
+                        <div class="bd-icon-box">
+                            <img id="bd-icon-0" src="" class="bd-icon" onerror="this.style.display='none'">
+                        </div>
+                        <span id="bd-val-0" class="bd-val">0%</span>
+                        <input type="number" id="bd-manual-0" class="bd-manual-input" placeholder="수기입" 
+                               onclick="event.stopPropagation()" oninput="calculate()">
+                    </div>
+                    
+                    <div class="bd-line"></div>
+                    
+                    <div id="bd-item-1" class="bd-item" onclick="toggleBonusFilter(1)">
+                        <div class="bd-icon-box">
+                            <img id="bd-icon-1" src="" class="bd-icon" onerror="this.style.display='none'">
+                        </div>
+                        <span id="bd-val-1" class="bd-val">0%</span>
+                        <input type="number" id="bd-manual-1" class="bd-manual-input" placeholder="수기입" 
+                               onclick="event.stopPropagation()" oninput="calculate()">
+                    </div>
+                    
+                    <div class="bd-line"></div>
+                    
+                    <div id="bd-item-2" class="bd-item" onclick="toggleBonusFilter(2)">
+                        <div class="bd-icon-box">
+                            <img id="bd-icon-2" src="" class="bd-icon" onerror="this.style.display='none'">
+                        </div>
+                        <span id="bd-val-2" class="bd-val">0%</span>
+                        <input type="number" id="bd-manual-2" class="bd-manual-input" placeholder="수기입" 
+                               onclick="event.stopPropagation()" oninput="calculate()">
+                    </div>
 
-    <div class="bd-line"></div>
-    <div id="bd-item-3" class="bd-item" onclick="toggleBonusFilter(3)">
-        <div class="bd-icon-box">
-            <img id="bd-icon-3" src="" class="bd-icon" onerror="this.style.display='none'">
-        </div>
-        <span id="bd-val-3" class="bd-val">0%</span>
-    </div>
-    </div>
+                    <div class="bd-line"></div>
+
+                    <div id="bd-item-3" class="bd-item" onclick="toggleBonusFilter(3)">
+                        <div class="bd-icon-box">
+                            <img id="bd-icon-3" src="" class="bd-icon" onerror="this.style.display='none'">
+                        </div>
+                        <span id="bd-val-3" class="bd-val">0%</span>
+                        <input type="number" id="bd-manual-3" class="bd-manual-input" placeholder="수기입" 
+                               onclick="event.stopPropagation()" oninput="calculate()">
+                    </div>
+                </div>
+
                 <div class="student-tabs">
                     <div class="s-tab striker active" onclick="toggleRoleFilter('STRIKER', this)">STRIKER</div>
                     <div class="s-tab special active" onclick="toggleRoleFilter('SPECIAL', this)">SPECIAL</div>
@@ -121,30 +110,22 @@
                     <label>현재 보유</label>
                     <input type="number" id="currentAmount" class="main-input" placeholder="0" oninput="updateCurrent(this.value)">
                 </div>
-                <div class="col">
-                    <label>보너스%</label>
-                    <input type="number" id="bonusRate" class="main-input" value="0" min="0" placeholder="0" oninput="calculate()">
                 </div>
-            </div>
 
             <div class="row result-row">
-                <div class="col">
-                    <label>추천 스테이지</label>
-                    <div class="recommend-box">
-                        <div id="recStageName" class="rec-name">계산 중...</div>
-                        <div id="recStageInfo" class="rec-info">-</div>
-                    </div>
-                </div>
-                <div class="col">
-                    <label>계산 결과</label>
-                    <div class="result-box compact-box">
-                        <div class="res-mini-title">필요 소탕</div>
-                        <div id="result-runs" class="res-value-sm">0회</div>
-                        <div id="result-ap" class="res-sub-sm">(0 AP)</div>
-                        <div id="result-surplus" class="res-surplus-sm"></div>
-                    </div>
-                </div>
+    <div class="col" style="flex: 1;"> <label>추천 스테이지 및 결과</label>
+        <div class="recommend-box unified-box">
+            
+            <div class="rec-header-row">
+                <div id="recStageName" class="rec-name">계산 대기 중...</div>
             </div>
+
+            <div id="result-surplus" class="rec-surplus-line"></div>
+
+            <div id="recStageInfo" class="rec-info-list">-</div>
+        </div>
+    </div>
+    </div>
         </div>
 
         <div class="drop-info-area">
@@ -168,7 +149,7 @@
         </div>
 
         <div class="version-info">
-            Blue Archive Calculator v1.1.0 | Updated 2025.12.03
+            이벤트 상점 계산기 0.1.3b | Last updated 2025.12.04 01:11 KST
         </div>
 
     </div> </div> <script type="module" src="/js/main.js"></script>
