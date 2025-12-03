@@ -119,7 +119,7 @@
     [
         { "name": "청휘석 600개", "img": "ui/Currency_Icon_Gem.webp", "price": 1500, "qty": 2 },
         { "name": "엘리그마 5개", "img": "ui/Item_Icon_SecretStone.webp", "price": 300, "qty": 10 },
-        { "name": "비의서", "img": "ui/Item_Icon_SkillBook_Ultimate.png", "price": 2000, "qty": 1 },
+        { "name": "비의서", "img": "ui/100px-Item_Icon_SkillBook_Ultimate.webp", "price": 2000, "qty": 1 },
         { "name": "500K 크레딧", "img": "ui/Item_Icon_SecretStone.webp", "price": 250, "qty": 6 },
         { "name": "미네(아이돌) 엘레프 5개", "img": "2D/Item_Icon_SecretStone_CH0275.webp", "price": 200, "qty": 5 },
         { "name": "미네(아이돌) 엘레프 5개", "img": "2D/Item_Icon_SecretStone_CH0275.webp", "price": 250, "qty": 5 },
