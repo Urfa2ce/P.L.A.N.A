@@ -2,7 +2,7 @@
 import { state } from './store.js';
 import { initTabs, initShop, initStageFilters, initAcademyFilter, initStudentBonus, initDropTable, updateBonusDashboardIcons, switchTab, toggleStudent, toggleApWidget, toggleAllStages, syncValues, updateTotal, manualTarget, updateCurrent, toggleStudentSelector, toggleBonusFilter, toggleRoleFilter } from './ui.js';
 import { calculate, calcAp, updateTotalBonus } from './calc.js';
-import { modifyQty, checkInput } from './ui.js'; // import 목록에 추가 필요!
+import { modifyQty, checkInput,toggleAllStudents } from './ui.js'; // import 목록에 추가 필요!
 
 // [NEW] 날짜 비교 유틸리티 함수
 // [js/main.js] 맨 위 또는 해당 함수 위치에 덮어쓰기
@@ -239,8 +239,9 @@ window.updateTotal = updateTotal;
 window.toggleAllStages = toggleAllStages;
 window.filterByAcademy = (ac) => { state.currentAcademy = ac; initStudentBonus(); };
 window.toggleEventListUI = toggleEventListUI;
-
+window.toggleAllStudents = toggleAllStudents;
 // 실행
+
 window.addEventListener('DOMContentLoaded', () => {
     // 자동 로드 함수만 실행 (여기서 날짜 체크 후 알아서 loadDataAndInit을 호출함)
     loadEventList(); 

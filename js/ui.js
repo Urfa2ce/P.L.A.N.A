@@ -201,14 +201,14 @@ export function initShop() {
                 
                 <div class="control-row stepper-box">
                     <button class="step-btn" onclick="modifyQty(this, 'min', ${i})">≪</button>
-                    <button class="step-btn" onclick="modifyQty(this, -1, ${i})">＜</button>
+                    <button class="step-btn" onclick="modifyQty(this, -1, ${i})">-</button>
                     
                     <input type="number" class="qty-input-main" 
                            min="0" max="${maxVal}" value="0" 
                            oninput="checkInput(this, ${i})"
                            onfocus="this.select()">
                            
-                    <button class="step-btn" onclick="modifyQty(this, 1, ${i})">＞</button>
+                    <button class="step-btn" onclick="modifyQty(this, 1, ${i})">+</button>
                     <button class="step-btn" onclick="modifyQty(this, 'max', ${i})">≫</button>
                 </div>
             `;
@@ -328,13 +328,13 @@ export function displayResult(results, surplusArray) {
             // ★ 수정됨: 목표가 0이면 '계산 대기 중' 표시
             nameEl.innerText = "계산 대기 중...";
             nameEl.style.color = "#aaa"; // 회색 (중립적)
-            infoEl.innerHTML = `<div class="rec-message">필요 재화량을 입력하면<br>최적의 스테이지를 추천해 드립니다.</div>`;
+            infoEl.innerHTML = `<div class="rec-message">필요 재화량을 입력하면<br>최적의 스테이지를<br>추천해 드립니다.</div>`;
         }
         else {
             // 목표는 있는데 이미 달성한 경우 (진짜 파밍 완료)
-            nameEl.innerText = "파밍 완료";
+            nameEl.innerText = "Ap소비 불필요";
             nameEl.style.color = "#4CAF50"; // 초록색 (긍정적)
-            infoEl.innerHTML = `<div class="rec-message" style="color:#4CAF50; font-weight:bold;">🎉 이미 목표를 달성했습니다!</div>`;
+            infoEl.innerHTML = `<div class="rec-message" style="color:#4CAF50; font-weight:bold;">이미 목표를 달성했습니다!</div>`;
         }
         
         if (surEl) {
@@ -369,7 +369,7 @@ export function displayResult(results, surplusArray) {
         `;
     });
 
-    nameEl.innerText = "추천 파밍 목록";
+    nameEl.innerText = "추천 지역 목록";
     nameEl.style.fontsize = "1.0.rem";
     nameEl.style.color = "#333";
     nameEl.style.marginBottom = "5px";
@@ -394,7 +394,7 @@ export function displayResult(results, surplusArray) {
 
     if (surEl) {
         if (surplusHtml.length > 0) {
-            surEl.innerHTML = `⚠️ 남는 재화: ` + surplusHtml.join('');
+            surEl.innerHTML = `남는 재화: ` + surplusHtml.join('');
             surEl.style.marginBottom = "8px";
         } else {
             surEl.innerHTML = "";
@@ -566,4 +566,37 @@ function reflectChange(input, sIdx) {
 
     // 전체 합계 재계산
     updateTotal(sIdx);
+}
+
+// js/ui.js 맨 아래에 추가
+
+// [NEW] 전체 선택 / 해제 로직
+export function toggleAllStudents(shouldSelect) {
+    const isFiltering = (state.activeBonusFilter !== -1);
+    const targetBonusIdx = isFiltering ? state.activeBonusFilter : state.currentTab;
+
+    state.studentData.forEach((student, idx) => {
+        // 1. 현재 필터 조건(Role, Academy, Bonus > 0)에 맞는지 검사
+        let visible = true;
+        if (isFiltering) {
+            const b = Array.isArray(student.bonus) ? (student.bonus[targetBonusIdx]||0) : student.bonus;
+            if (b <= 0) visible = false;
+        }
+        if (visible && (!student.role || state.activeRoles.has(student.role))) {
+            if (state.currentAcademy !== "ALL" && student.academy !== state.currentAcademy) visible = false;
+        }
+
+        // 2. 현재 화면에 보이는 학생이라면 -> 선택 or 해제
+        if (visible) {
+            if (shouldSelect) {
+                state.selectedStudents.add(idx);
+            } else {
+                state.selectedStudents.delete(idx);
+            }
+        }
+    });
+
+    // 3. UI 및 계산 갱신
+    initStudentBonus(); // 카드 스타일 갱신
+    updateTotalBonus(); // 총합 다시 계산
 }
